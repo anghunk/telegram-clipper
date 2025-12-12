@@ -1,0 +1,370 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.popup-container {
+  width: 400px;
+  min-height: 450px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部标题栏 - Telegram 蓝色 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #3390ec;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.header h1 {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.settings-btn {
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: white;
+  padding: 0;
+}
+
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 主面板 */
+.main-view,
+.settings-view {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f4f4f5;
+}
+
+.settings-view {
+  background: #ffffff;
+}
+
+.settings-view h2 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #000000;
+}
+
+/* 状态栏 - Telegram 风格 */
+.status-bar {
+  background-color: #fff9c4;
+  border-left: 3px solid #fbc02d;
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.status-bar.configured {
+  background-color: #e8f5e9;
+  border-left-color: #4caf50;
+}
+
+.status-icon {
+  font-size: 18px;
+}
+
+.status-text {
+  font-weight: 400;
+  color: #000000;
+  font-size: 14px;
+}
+
+/* 输入区 - Telegram 消息框风格 */
+.input-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.input-section label {
+  display: block;
+  margin-bottom: 8px;
+  color: #707579;
+  font-weight: 500;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-section textarea {
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid #e4e4e5;
+  border-radius: 8px;
+  resize: none;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  flex: 1;
+  background: #ffffff;
+  color: #000000;
+}
+
+.input-section textarea:focus {
+  outline: none;
+  border-color: #3390ec;
+}
+
+.input-section textarea::placeholder {
+  color: #a2acb4;
+}
+
+.input-footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.hint {
+  font-size: 12px;
+}
+
+.btn-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: #3390ec;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-send:hover:not(:disabled) {
+  background: #2b7cd3;
+}
+
+.btn-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 快捷操作 */
+.quick-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #e4e4e5;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover:not(:disabled) {
+  background: #f4f4f5;
+  border-color: #3390ec;
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 设置页面表单 - Telegram 风格 */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #707579;
+  font-weight: 500;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e4e4e5;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  background: #ffffff;
+  color: #000000;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: #3390ec;
+  outline: none;
+}
+
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+  color: #a2acb4;
+}
+
+.help-text {
+  font-size: 12px;
+  color: #707579;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* 密码输入框包装器 */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  padding-right: 45px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  height: auto;
+  background: transparent;
+  border: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #707579;
+  transition: all 0.2s;
+  padding: 0;
+  margin: 0;
+}
+
+.toggle-password:hover {
+  color: #3390ec;
+  background: rgba(51, 144, 236, 0.05);
+}
+
+.toggle-password svg {
+  flex-shrink: 0;
+}
+
+/* 按钮 - Telegram 风格 */
+button {
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 10px;
+}
+
+.btn-primary {
+  background-color: #3390ec;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2b7cd3;
+}
+
+.btn-secondary {
+  background-color: #f4f4f5;
+  color: #3390ec;
+  border: 1px solid #e4e4e5;
+}
+
+.btn-secondary:hover {
+  background-color: #e8e8e9;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 状态消息 - Telegram 通知风格 */
+.status-message,
+.status {
+  text-align: center;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-weight: 400;
+  font-size: 13px;
+  transition: all 0.3s;
+}
+
+.status-message.success,
+.status.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-message.error,
+.status.error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-message.info,
+.status.info {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
