@@ -59,7 +59,11 @@ jobs:
         ---
 
         使用方法:  
-        - **Chrome / Edge / Arc / Brave**：[Chrome Web Store](http://github.com/anghunk/telegram-clipper)
+        | 浏览器                          | 安装链接                                                                                      | 备注     |
+        | ------------------------------- | --------------------------------------------------------------------------------------------- | -------- |
+        | **Chrome / Edge / Arc / Brave** | [Chrome Web Store](https://chromewebstore.google.com/detail/hnpnidoofhkekffllchemjiiffpafhhd) | 推荐     |
+        | **Firefox**                     |      暂无        |      |
+        | **国内用户**                    | 暂无          |  |
         
         发布于：$CURRENT_DATE" \
         .output/*.zip
