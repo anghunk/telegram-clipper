@@ -99,14 +99,79 @@
           <small>在 Discord 频道设置中创建 Webhook</small>
         </div>
 
+      </div>
+
+      <!-- Notion 配置 -->
+      <div v-if="activePlatformTab === 'notion'" class="config-form">
         <div class="form-group">
-          <label>自定义用户名(可选)</label>
+          <label class="switch-label">
+            <input 
+              type="checkbox" 
+              v-model="platformConfigs.notion.enabled"
+              class="switch-input"
+            />
+            <span class="switch-slider"></span>
+            <span class="switch-text">启用 Notion</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Integration Token</label>
           <input
             type="text"
-            v-model="platformConfigs.discord.username"
-            placeholder="Clipper Bot"
+            v-model="platformConfigs.notion.integrationToken"
+            placeholder="secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
           />
-          <small>自定义在 Discord 中显示的发送者名称</small>
+          <small>在 <a href="https://www.notion.so/my-integrations" target="_blank">Notion Integrations</a> 创建 Integration 获取 Token</small>
+        </div>
+
+        <div class="form-group">
+          <label>Database ID</label>
+          <input
+            type="text"
+            v-model="platformConfigs.notion.databaseId"
+            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+          />
+          <small>从数据库页面 URL 中提取，并将 Integration 连接到该数据库</small>
+        </div>
+
+        <div class="form-group">
+          <label>高级配置</label>
+          <details style="margin-top: 8px;">
+            <summary style="cursor: pointer; color: #666; font-size: 13px;">属性名称映射</summary>
+            <div style="margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+              <div style="margin-bottom: 12px;">
+                <label style="font-size: 12px; color: #666;">标题字段名称</label>
+                <input
+                  type="text"
+                  v-model="platformConfigs.notion.titleProperty"
+                  placeholder="Name"
+                  style="margin-top: 4px;"
+                />
+              </div>
+              <div style="margin-bottom: 12px;">
+                <label style="font-size: 12px; color: #666;">内容字段名称</label>
+                <input
+                  type="text"
+                  v-model="platformConfigs.notion.contentProperty"
+                  placeholder="Content"
+                  style="margin-top: 4px;"
+                />
+              </div>
+              <div>
+                <label style="font-size: 12px; color: #666;">来源字段名称</label>
+                <input
+                  type="text"
+                  v-model="platformConfigs.notion.sourceProperty"
+                  placeholder="Source"
+                  style="margin-top: 4px;"
+                />
+              </div>
+            </div>
+          </details>
+          <small style="display: block; margin-top: 8px;">
+            📚 没有数据库？<a href="https://anghunk.notion.site/2cad17511b968031a7ebeecd5e279c6a" target="_blank">复制该副本模板</a>
+          </small>
         </div>
       </div>
 

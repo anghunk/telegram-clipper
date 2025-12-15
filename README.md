@@ -20,11 +20,14 @@
 
 ### 🔌 支持的平台
 
-| 平台     | 状态       | 说明                    |
-| -------- | ---------- | ----------------------- |
-| Telegram | ✅ 支持    | 通过 Bot API 发送到频道 |
-| Discord  | ✅ 支持    | 通过 Webhook 发送到频道 |
-| Notion   | 🚧 开发中 | 数据库模式              |
+| 平台     | 状态     | 说明                            |
+| -------- | -------- | ------------------------------- |
+| Telegram | ✅ 支持  | 通过 Bot API 发送到频道         |
+| Discord  | ✅ 支持  | 通过 Webhook 发送到频道         |
+| Notion   | ✅ 支持  | 通过Notion API 发送到  Database |
+| Obsidian | 🚧 计划 |                                 |
+| 飞书文档 | 🚧 计划 |                                 |
+| 语雀笔记 | 🚧 计划 |                                 |
 
 ## 🚀 快速开始
 
@@ -42,22 +45,6 @@ npm run dev
 # 构建生产版本
 npm run build
 ```
-
-### 2. 加载扩展到浏览器
-
-**Chrome / Edge：**
-
-1. 打开 `chrome://extensions/`
-2. 开启"开发者模式"
-3. 点击"加载已解压的扩展程序"
-4. 选择项目的 `.output/chrome-mv3` 目录
-
-**Firefox：**
-
-1. 运行 `npm run dev:firefox`
-2. 打开 `about:debugging#/runtime/this-firefox`
-3. 点击"临时加载附加组件"
-4. 选择 `.output/firefox-mv2/manifest.json`
 
 ### 3. 配置平台
 
@@ -160,7 +147,7 @@ A: 使用本地浏览器的 `browser.storage.sync` API 存储，数据会在同�
 
 ## 📄 许可证
 
-[MIT License](./LICENSE)
+[Apache-2.0 license](./LICENSE)
 
 ## 🙏 致谢
 

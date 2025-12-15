@@ -15,7 +15,8 @@ export default defineConfig({
 			'import.meta.env.VITE_TELEGRAM_BOT_TOKEN': JSON.stringify(process.env.VITE_TELEGRAM_BOT_TOKEN || ''),
 			'import.meta.env.VITE_TELEGRAM_CHANNEL_ID': JSON.stringify(process.env.VITE_TELEGRAM_CHANNEL_ID || ''),
 			'import.meta.env.VITE_DISCORD_WEBHOOK_URL': JSON.stringify(process.env.VITE_DISCORD_WEBHOOK_URL || ''),
-			'import.meta.env.VITE_DISCORD_USERNAME': JSON.stringify(process.env.VITE_DISCORD_USERNAME || ''),
+			'import.meta.env.VITE_NOTION_INTEGRATION_TOKEN': JSON.stringify(process.env.VITE_NOTION_INTEGRATION_TOKEN || ''),
+			'import.meta.env.VITE_NOTION_DATABASE_ID': JSON.stringify(process.env.VITE_NOTION_DATABASE_ID || ''),
 		},
 	}),
 	extensionApi: 'chrome',
@@ -29,6 +30,7 @@ export default defineConfig({
 			'https://api.telegram.org/*',
 			'https://discord.com/*',
 			'https://discordapp.com/*',
+			'https://api.notion.com/*',
 			'<all_urls>'
 		],
 	},
