@@ -1,6 +1,6 @@
 ![](./public/icon/128.png)
 
-# Clipper Hub - 剪藏驿站
+## Clipper Hub - 万能剪藏
 
 > 将网页内容一键收藏至多个平台的浏览器扩展，支持 Telegram、Discord 等多个平台，让你的灵感和收藏无处不在。
 
