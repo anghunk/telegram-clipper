@@ -1,5 +1,5 @@
 {
-  "name": "telegram-clipper",
+  "name": "clipper-hub",
   "description": "manifest.json description",
   "private": true,
   "version": "0.0.2",
@@ -17,6 +17,7 @@
     "rf": "rimraf node_modules"
   },
   "dependencies": {
+    "element-plus": "^2.12.0",
     "publish": "^0.6.0",
     "rimraf": "^6.1.2",
     "vue": "^3.5.12",

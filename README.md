@@ -1,53 +1,36 @@
 ![](./public/icon/128.png)
 
-## Telegram Clipper - TG 剪藏
+# Clipper Hub - 剪藏驿站
 
-基于 [爆肝 2 小时！一键 TG 频道助手 - Chrome 插件发布（碎片信息化 - 收藏整理发布到 - Telegram）](https://linux.do/t/topic/1302858) 代码的基础进行二次开发。新增自定义内容发送
-
-> 将网页精彩内容一键收藏至 Telegram 频道,支持文字编辑、格式保留和网页快存。
+> 将网页内容一键收藏至多个平台的浏览器扩展，支持 Telegram、Discord 等多个平台，让你的灵感和收藏无处不在。
 
 ## ✨ 功能特性
 
-- **快速发送** - Popup 快捷输入框，直接发送消息到频道
-- **右键菜单** - 选中文字后右键发送
-- **编辑模式** - 发送前编辑内容，添加标题
-- **网页收藏** - 一键保存当前网页（标题+链接）
-- **格式保留** - 自动保留文本换行和段落格式
+### 🎯 核心功能
 
+- **多平台支持** - 同时发送到 Telegram、Discord 等多个平台
+- **快速发送** - Popup 快捷输入框，直接发送消息
+- **右键菜单** - 选中文字后右键发送
+- **编辑模式** - 发送前编辑内容，添加自定义标题
+- **网页收藏** - 一键保存当前网页（标题 + 链接）
+
+### 🔌 支持的平台
+
+| 平台     | 状态       | 说明                    |
+| -------- | ---------- | ----------------------- |
+| Telegram | ✅ 支持    | 通过 Bot API 发送到频道 |
+| Discord  | ✅ 支持    | 通过 Webhook 发送到频道 |
+| Notion   | 🚧 开发中 | 数据库模式              |
 
 ## 🚀 快速开始
 
-### 1. 准备 Telegram Bot
-
-1. 在 Telegram 中搜索 `@BotFather`
-2. 发送 `/newbot` 创建机器人
-3. 复制获得的 **Bot Token**（格式：`123456789:ABCdefGHIjklMNOpqrsTUVwxyz`）
-
-### 2. 准备频道
-
-1. 创建一个 Telegram 频道
-2. 将机器人添加为频道**管理员**
-3. 获取频道 ID：
-   - 公开频道：直接使用 `@频道用户名`（如 `@mychannel`）
-   - 私有频道：使用数字 ID（格式：`-100xxxxxxxxx`）
-
-### 3. 安装插件
+### 1. 安装
 
 ```bash
-# 克隆项目
-git clone <repository-url>
-cd TelegramKKK
+cd clipper-hub
 
 # 安装依赖
 npm install
-
-# （可选）配置环境变量默认值
-# 复制 .env.example 为 .env.development
-cp .env.example .env.development
-
-# 在 .env.development 中配置默认的 Bot Token 和 Channel ID
-# VITE_TELEGRAM_BOT_TOKEN=你的Bot Token
-# VITE_TELEGRAM_CHANNEL_ID=你的频道ID
 
 # 开发模式
 npm run dev
@@ -56,79 +39,129 @@ npm run dev
 npm run build
 ```
 
-### 4. 配置插件
+### 2. 加载扩展到浏览器
 
-**方式一：环境变量配置（推荐用于开发/团队）**
+**Chrome / Edge：**
 
-1. 复制 `.env.example` 为 `.env.development`
-2. 编辑 `.env.development`，填写默认的 Bot Token 和 Channel ID：
-   ```bash
-   VITE_TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
-   VITE_TELEGRAM_CHANNEL_ID=@mychannel
-   ```
-3. 重新构建项目：`npm run dev` 或 `npm run build`
-4. 如果用户未在设置页面填写配置，将自动使用环境变量中的默认值
+1. 打开 `chrome://extensions/`
+2. 开启"开发者模式"
+3. 点击"加载已解压的扩展程序"
+4. 选择项目的 `.output/chrome-mv3` 目录
 
-**方式二：界面配置（用于个人使用）**
+**Firefox：**
 
-1. 点击浏览器扩展图标打开 Popup
-2. 点击右上角设置按钮 ⚙️
-3. 填写 Bot Token 和 Channel ID
-4. 点击"测试连接"验证配置
-5. 保存设置
+1. 运行 `npm run dev:firefox`
+2. 打开 `about:debugging#/runtime/this-firefox`
+3. 点击"临时加载附加组件"
+4. 选择 `.output/firefox-mv2/manifest.json`
 
-**注意：** 界面配置的值优先级高于环境变量。如果用户在设置页面填写了配置，将使用界面配置的值。
+### 3. 配置平台
 
-## 💡 使用方式
+1. 点击浏览器扩展图标
+2. 点击右上角"设置"按钮
+3. 在侧边栏选择要配置的平台
+4. 填写平台配置信息
+5. 点击"测试连接"验证配置
+6. 点击"保存"完成配置
 
-### 方式一：快捷输入（Popup）
+**详细配置教程：**
 
-1. 点击扩展图标
-2. 在输入框中输入内容
-3. 按 `Ctrl + Enter` 或点击"发送"按钮
+- [Telegram 配置指南](./docs/platforms/telegram.md)
+- [Discord 配置指南](./docs/platforms/discord.md)
 
-### 方式二：选中文字发送
+## 🏗️ 项目架构
 
-1. 在任意网页选中文字
-2. 右键菜单 → **一键 TG 频道助手** → **⚡ 发送选中文字**
+### 目录结构
 
-### 方式三：编辑后发送
+```
+clipper-hub/
+├── entrypoints/          # 扩展入口点
+│   ├── background.ts     # 后台服务
+│   ├── content.ts        # 内容脚本
+│   ├── popup/            # 弹出窗口
+│   ├── options/          # 设置页面
+│   └── edit/             # 编辑页面
+├── lib/
+│   └── platforms/        # 平台适配层（中间件）
+│       ├── types.ts      # 平台接口定义
+│       ├── telegram.ts   # Telegram 平台实现
+│       ├── discord.ts    # Discord 平台实现
+│       └── index.ts      # 平台管理器
+├── public/               # 静态资源
+├── docs/                 # 文档
+│   └── platforms/        # 平台配置文档
+└── wxt.config.ts         # WXT 配置
+```
 
-1. 在任意网页选中文字
-2. 右键菜单 → **一键 TG 频道助手** → **✏️ 编辑后发送**
-3. 在弹出窗口编辑内容、添加标题
-4. 点击"保存收藏"
+### 中间件模式
 
-### 方式四：收藏网页
+项目采用中间件模式实现平台解耦：
 
-1. 在需要收藏的网页上右键
-2. 右键菜单 → **一键 TG 频道助手** → **🔖 收藏网址**
+- **Platform 接口**：定义统一的平台行为规范
+- **平台实现**：每个平台独立实现 Platform 接口
+- **平台管理器**：统一管理所有平台的配置和调用
+- **易于扩展**：新增平台只需实现 Platform 接口即可
 
 ## 📝 开发命令
 
 ```bash
-npm run dev          # 开发模式
-npm run build        # 构建生产版本
-npm run zip          # 打包为 zip 文件
-npm run compile      # 类型检查
+# 开发
+npm run dev              # Chrome 开发模式
+npm run dev:firefox      # Firefox 开发模式
+
+# 构建
+npm run build            # 构建 Chrome 版本
+npm run build:firefox    # 构建 Firefox 版本
+
+# 打包
+npm run zip              # 打包 Chrome 版本为 zip
+npm run zip:firefox      # 打包 Firefox 版本为 zip
+npm run publish          # 构建并打包所有版本
+
+# 其他
+npm run compile          # TypeScript 类型检查
 ```
 
 ## 🔧 常见问题
 
-**Q: 提示"配置缺失"？**  
-A: 需要先在设置中配置 Bot Token 和 Channel ID
+**Q: 如何添加新的平台支持？**
 
-**Q: 发送失败？**  
-A: 检查：
+A: 参考 [开发文档 - 添加新平台](./docs/development/add-platform.md)
 
-- Bot Token 是否正确
-- 机器人是否已添加为频道管理员
-- Channel ID 格式是否正确
-- 网络连接是否正常
+**Q: 消息发送失败怎么办？**
 
-**Q: 如何获取私有频道 ID？**  
-A: 使用 `@userinfobot`，将机器人添加到频道后会显示频道 ID
+A: 请检查：
+1. 平台配置是否正确（点击"测试连接"验证）
+2. 网络连接是否正常
+3. 平台服务是否可用
+4. 查看浏览器控制台错误信息
 
-## 📄 License
+**Q: 可以只启用部分平台吗？**
 
-[MIT](./LICENSE)
+A: 可以。在设置页面中，每个平台都有独立的启用开关，其他平台正在陆续开发支持中。
+
+**Q: 配置数据存储在哪里？**
+
+A: 使用本地浏览器的 `browser.storage.sync` API 存储，数据会在同一账号的不同设备间同步。**完全不接触云端。**
+
+## 🤝 贡献
+
+欢迎贡献代码、报告问题或提出建议！
+
+### 添加新平台
+
+如果你想添加对新平台的支持，请参考：
+- [平台开发文档](./docs/development/add-platform.md)
+- 现有平台实现：[telegram.ts](./lib/platforms/telegram.ts)、[discord.ts](./lib/platforms/discord.ts)
+
+## 📄 许可证
+
+[MIT License](./LICENSE)
+
+## 🙏 致谢
+
+本项目基于 [爆肝 2 小时！一键 TG 频道助手](https://linux.do/t/topic/1302858) 进行二次开发和重构。
+
+---
+
+⭐ 如果这个项目对你有帮助，欢迎 Star！

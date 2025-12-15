@@ -1,19 +1,16 @@
 import { defineBackground } from 'wxt/sandbox';
 import { browser } from 'wxt/browser';
+import { sendToAllEnabled, hasAnyConfigured, type SendResult, type PlatformType } from '@/lib/platforms';
 
 export default defineBackground(() => {
-  console.log('Telegram Clipper - TG 剪藏 - 后台服务启动', { id: browser.runtime.id });
-  
-  // 从环境变量获取默认配置
-  const envBotToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '';
-  const envChannelId = import.meta.env.VITE_TELEGRAM_CHANNEL_ID || '';
-  
+  console.log('Clipper Hub - 万能剪藏 - 后台服务启动', { id: browser.runtime.id });
+
   // Create context menu when extension is installed
   browser.runtime.onInstalled.addListener(() => {
     // Parent menu
     browser.contextMenus.create({
       id: "telegramParent",
-      title: "Telegram Clipper - TG 剪藏",
+      title: "Clipper Hub - 万能剪藏",
       contexts: ["all"]
     });
 
@@ -21,7 +18,7 @@ export default defineBackground(() => {
     browser.contextMenus.create({
       id: "sendToTelegram",
       parentId: "telegramParent",
-      title: "⚡ 发送选中文字",
+      title: "发送选中文字",
       contexts: ["selection"]
     });
 
@@ -29,7 +26,7 @@ export default defineBackground(() => {
     browser.contextMenus.create({
       id: "editBeforeSend",
       parentId: "telegramParent",
-      title: "✏️ 编辑后发送",
+      title: "编辑后发送",
       contexts: ["selection"]
     });
 
@@ -37,7 +34,7 @@ export default defineBackground(() => {
     browser.contextMenus.create({
       id: "bookmarkPage",
       parentId: "telegramParent",
-      title: "🔖 收藏网址",
+      title: "收藏网址",
       contexts: ["page"]
     });
   });
@@ -46,7 +43,7 @@ export default defineBackground(() => {
   browser.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "sendToTelegram" && info.selectionText) {
       getSelectionWithLineBreaks(tab, (text) => {
-        sendToTelegram(text || info.selectionText || '');
+        sendToAllPlatforms(text || info.selectionText || '');
       });
     } else if (info.menuItemId === "editBeforeSend" && info.selectionText && tab) {
       openEditPage(info.selectionText, tab.url || '');
@@ -60,9 +57,12 @@ export default defineBackground(() => {
     if (request.action === 'testNotification') {
       showNotification('测试通知', '这是一条测试通知消息');
       sendResponse({ success: true });
-    } else if (request.action === 'sendToTelegram') {
-      sendToTelegram(request.text);
-      sendResponse({ success: true });
+    } else if (request.action === 'sendToTelegram' || request.action === 'sendToAllPlatforms') {
+      // 兼容旧的 sendToTelegram action，同时支持新的 sendToAllPlatforms
+      sendToAllPlatforms(request.text).then(results => {
+        sendResponse({ success: true, results });
+      });
+      return true; // 保持消息通道开放用于异步响应
     }
     return true;
   });
@@ -133,54 +133,47 @@ function getSelectionWithLineBreaks(tab: any, callback: (text: string | null) =>
   });
 }
 
-function sendToTelegram(text: string) {
-  browserAPI.storage.sync.get(["telegramBotToken", "telegramChannelId"], (items: any) => {
-    // 优先使用存储中的值，如果没有则使用环境变量
-    const envBotToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '';
-    const envChannelId = import.meta.env.VITE_TELEGRAM_CHANNEL_ID || '';
+// 发送消息到所有已启用的平台
+async function sendToAllPlatforms(text: string): Promise<Record<PlatformType, SendResult>> {
+  // 检查是否有任何平台已配置
+  const hasConfigured = await hasAnyConfigured();
+  
+  if (!hasConfigured) {
+    showNotification("配置缺失", "请先在扩展选项中配置至少一个平台");
+    browserAPI.runtime.openOptionsPage();
+    return {} as Record<PlatformType, SendResult>;
+  }
+
+  try {
+    const results = await sendToAllEnabled(text);
     
-    const token = items.telegramBotToken || envBotToken;
-    const chatId = items.telegramChannelId || envChannelId;
-
-    if (!token || !chatId) {
-      showNotification("配置缺失", "请先在扩展选项中设置 Bot Token 和 Channel ID");
-      browserAPI.runtime.openOptionsPage();
-      return;
+    // 统计发送结果
+    const successPlatforms: string[] = [];
+    const failedPlatforms: string[] = [];
+    
+    for (const [platform, result] of Object.entries(results)) {
+      if (result.success) {
+        successPlatforms.push(platform);
+      } else {
+        failedPlatforms.push(`${platform}: ${result.error}`);
+      }
     }
-
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    const data = {
-      chat_id: chatId,
-      text: text
-    };
-
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(result => {
-        if (result.ok) {
-          showNotification("发送成功", "消息已发送到 Telegram");
-        } else {
-          console.error("Telegram API Error:", JSON.stringify(result, null, 2));
-          let errorMsg = "未知错误";
-          if (result.description) {
-            errorMsg = result.description;
-          } else if (result.error_code) {
-            errorMsg = `错误代码: ${result.error_code}`;
-          }
-          showNotification("发送失败", errorMsg);
-        }
-      })
-      .catch(error => {
-        console.error("Network Error:", error);
-        showNotification("发送失败", "网络错误或无法连接到 Telegram API");
-      });
-  });
+    
+    // 显示通知
+    if (successPlatforms.length > 0 && failedPlatforms.length === 0) {
+      showNotification("发送成功", `消息已发送到: ${successPlatforms.join(', ')}`);
+    } else if (successPlatforms.length > 0 && failedPlatforms.length > 0) {
+      showNotification("部分发送成功", `成功: ${successPlatforms.join(', ')}\n失败: ${failedPlatforms.join(', ')}`);
+    } else {
+      showNotification("发送失败", failedPlatforms.join('\n'));
+    }
+    
+    return results;
+  } catch (error: any) {
+    console.error("Send Error:", error);
+    showNotification("发送失败", error.message || "未知错误");
+    return {} as Record<PlatformType, SendResult>;
+  }
 }
 
 function bookmarkPage(tab: any) {
@@ -216,7 +209,8 @@ function openEditPage(initialSelection: string, pageUrl: string) {
         url: 'edit.html',
         type: 'popup',
         width: 650,
-        height: 600
+        height: 600,
+        left: 100,
       });
     });
   };

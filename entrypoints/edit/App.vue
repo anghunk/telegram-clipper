@@ -32,11 +32,12 @@
 
     <div class="button-group">
       <button @click="handleCancel" class="btn btn-secondary">取消</button>
-      <button @click="handleSave" class="btn btn-primary">
-        <svg viewBox="0 0 24 24" width="16" height="16">
+      <button @click="handleSave" :disabled="isSending" class="btn btn-primary">
+        <svg v-if="!isSending" viewBox="0 0 24 24" width="16" height="16">
           <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
         </svg>
-        保存并发送
+        <span v-if="isSending" class="spinner"></span>
+        {{ isSending ? '发送中...' : '保存并发送到所有平台' }}
       </button>
     </div>
   </div>
@@ -45,12 +46,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { browser } from "wxt/browser";
+import { ElMessage } from 'element-plus';
 
 const browserAPI = browser;
 
 const titleInput = ref("");
 const contentHTML = ref("");
 const includeSource = true; // 默认始终包含来源
+const isSending = ref(false);
 const editData = ref<{
   content: string;
   contentHTML: string;
@@ -157,7 +160,7 @@ function onContentInput(event: Event) {
 
 async function handleSave() {
   if (!editData.value) {
-    alert("数据丢失，请重试");
+    ElMessage.error('数据丢失，请重试');
     return;
   }
 
@@ -173,7 +176,7 @@ async function handleSave() {
     .join("\n");
 
   if (!editedContent.trim()) {
-    alert("内容不能为空");
+    ElMessage.error('内容不能为空');
     return;
   }
 
@@ -196,20 +199,53 @@ async function handleSave() {
     message += `\n\n来源: ${editData.value.url}`;
   }
 
-  // 发送到 Telegram
+  // 发送到所有已启用的平台
+  isSending.value = true;
   try {
     const response = (await browserAPI.runtime.sendMessage({
-      action: "sendToTelegram",
+      action: "sendToAllPlatforms",
       text: message,
-    })) as { success?: boolean };
+    })) as { success?: boolean; results?: Record<string, { success: boolean; error?: string }> };
+    
     if (response && response.success) {
-      window.close();
+      // 检查是否有平台发送成功
+      const results = response.results || {};
+      const successPlatforms = Object.entries(results)
+        .filter(([_, r]) => r.success)
+        .map(([platform]) => platform);
+      const failedPlatforms = Object.entries(results)
+        .filter(([_, r]) => !r.success)
+        .map(([platform, r]) => `${platform}: ${r.error}`);
+      
+      if (successPlatforms.length > 0) {
+        if (failedPlatforms.length === 0) {
+          // 全部成功
+          ElMessage.success({
+            message: `发送成功！已发送到: ${successPlatforms.join(', ')}`,
+            duration: 2000,
+            onClose: () => window.close()
+          });
+        } else {
+          // 部分成功
+          ElMessage.warning({
+            message: `部分发送成功\n成功: ${successPlatforms.join(', ')}\n失败: ${failedPlatforms.join(', ')}`,
+            duration: 3000,
+            onClose: () => window.close()
+          });
+        }
+      } else {
+        // 全部失败
+        const errors = failedPlatforms.join('\n');
+        ElMessage.error(`发送失败\n${errors || '未知错误'}`);
+      }
     } else {
-      alert("发送失败,请重试");
+      ElMessage.error('发送失败，请检查平台配置');
     }
   } catch (error) {
     console.error("发送失败:", error);
-    alert("发送失败,请重试");
+    ElMessage.error('发送失败，请重试');
+  } finally {
+    isSending.value = false;
   }
 }
 
@@ -487,5 +523,21 @@ function htmlToTextWithBreaks(html: string): string {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Loading 动画 */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>
