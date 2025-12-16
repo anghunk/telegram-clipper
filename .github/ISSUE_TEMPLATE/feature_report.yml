@@ -8,10 +8,7 @@ body:
       value: |
         **开始之前...**
 
-        请注意，以下功能不会添加进扩展：
-
-        1. 自动阅读
-        2. ...
+        请尽量将前因后果描述清楚
         
   - type: textarea
     id: steps-to-reproduce
