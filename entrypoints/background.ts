@@ -1,4 +1,4 @@
-import { defineBackground } from 'wxt/sandbox';
+import { defineBackground } from '#imports';
 import { browser } from 'wxt/browser';
 import { sendToAllEnabled, hasAnyConfigured, type SendResult, type PlatformType } from '@/lib/platforms';
 

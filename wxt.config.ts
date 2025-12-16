@@ -19,7 +19,6 @@ export default defineConfig({
 			'import.meta.env.VITE_NOTION_DATABASE_ID': JSON.stringify(process.env.VITE_NOTION_DATABASE_ID || ''),
 		},
 	}),
-	extensionApi: 'chrome',
 	modules: ['@wxt-dev/module-vue'],
 	manifest: {
 		name: 'Clipper Hub - 万能剪藏',

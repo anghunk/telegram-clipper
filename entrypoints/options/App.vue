@@ -145,7 +145,7 @@
                 <input
                   type="text"
                   v-model="platformConfigs.notion.titleProperty"
-                  placeholder="Name"
+                  placeholder="标题"
                   style="margin-top: 4px;"
                 />
               </div>
@@ -154,7 +154,7 @@
                 <input
                   type="text"
                   v-model="platformConfigs.notion.contentProperty"
-                  placeholder="Content"
+                  placeholder="内容"
                   style="margin-top: 4px;"
                 />
               </div>
@@ -163,7 +163,7 @@
                 <input
                   type="text"
                   v-model="platformConfigs.notion.sourceProperty"
-                  placeholder="Source"
+                  placeholder="来源"
                   style="margin-top: 4px;"
                 />
               </div>

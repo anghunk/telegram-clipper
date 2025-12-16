@@ -68,7 +68,30 @@ export interface Platform {
 	validateConfig(config: PlatformConfig): boolean;
 }
 
-// 默认配置
+// 获取环境变量默认配置（不存储到 storage，仅作为运行时默认值）
+export function getEnvDefaultConfigs(): AllPlatformConfigs {
+	return {
+		telegram: {
+			enabled: false,
+			botToken: import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '',
+			channelId: import.meta.env.VITE_TELEGRAM_CHANNEL_ID || '',
+		},
+		discord: {
+			enabled: false,
+			webhookUrl: import.meta.env.VITE_DISCORD_WEBHOOK_URL || '',
+		},
+		notion: {
+			enabled: false,
+			integrationToken: import.meta.env.VITE_NOTION_INTEGRATION_TOKEN || '',
+			databaseId: import.meta.env.VITE_NOTION_DATABASE_ID || '',
+			titleProperty: '标题',
+			contentProperty: '内容',
+			sourceProperty: '来源',
+		},
+	};
+}
+
+// 默认配置（空配置，不使用环境变量）
 export const defaultConfigs: AllPlatformConfigs = {
 	telegram: {
 		enabled: false,
@@ -83,8 +106,8 @@ export const defaultConfigs: AllPlatformConfigs = {
 		enabled: false,
 		integrationToken: '',
 		databaseId: '',
-		titleProperty: 'Name',
-		contentProperty: 'Content',
-		sourceProperty: 'Source',
+		titleProperty: '标题',
+		contentProperty: '内容',
+		sourceProperty: '来源',
 	},
 };
