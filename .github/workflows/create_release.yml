@@ -54,6 +54,7 @@ jobs:
         CURRENT_DATE=$(TZ='Asia/Shanghai' date +'%Y-%m-%d  %H:%M')
         gh release create "$PACKAGE_VERSION" \
         -t "$PACKAGE_VERSION" \
+        --generate-notes \
         -n "## Release $PACKAGE_VERSION
 
         ---
