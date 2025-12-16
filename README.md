@@ -2,11 +2,11 @@
 
 ## Clipper Hub - 万能剪藏
 
-> 将网页内容一键收藏至多个平台的浏览器扩展，支持 Telegram、Discord 等多个平台，让你的灵感和收藏无处不在。
+> 将网页内容一键收藏至多个平台的浏览器扩展，支持 Telegram、Discord、Notion 等多个平台，让你的灵感和收藏无处不在。
 
 正在申请商店发布中，请耐心等待~~
 
-<img width="2022" height="1378" alt="frame_generic_dark" src="https://github.com/user-attachments/assets/019a6651-d199-49c0-8459-fffbc4097777" />
+<img width="2022" height="1378" alt="frame_generic_dark" src="https://github.com/user-attachments/assets/5b6678fe-aff9-4220-aac1-813777c80f23" />
 
 ## ✨ 功能特性
 
