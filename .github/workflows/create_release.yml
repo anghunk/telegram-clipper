@@ -58,10 +58,13 @@ jobs:
         -n "## Release $PACKAGE_VERSION
 
         ---
-
-        使用方法:  
        
-        **Chrome / Edge / Arc / Brave** | [Chrome Web Store](https://github.com/anghunk/clipper-hub)
+        使用方法:  
+        | 浏览器                          | 安装链接                                                                                      | 备注     |
+        | ------------------------------- | --------------------------------------------------------------------------------------------- | -------- |
+        | **Chrome / Edge / Arc / Brave** | [Chrome Web Store](https://chromewebstore.google.com/detail/hnpnidoofhkekffllchemjiiffpafhhd) | 推荐     |
+        | **Firefox**                     | [Firefox Addons](https://addons.mozilla.org/zh-CN/firefox/addon/clipper-hub/)            | 推荐     |
+        | **国内用户**                    | [Crx 商店](https://www.crxsoso.com/webstore/detail/fbgblmjbeebanackldpbmpacppflgmlj)          | 无需翻墙 |
         
         发布于：$CURRENT_DATE" \
         .output/*.zip

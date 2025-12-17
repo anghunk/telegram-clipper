@@ -1,10 +1,34 @@
-![](./public/icon/48.png)
+<div align="center">
+  <a href="https://github.com/anghunk/clipper-hub">
+    <img src="https://github.com/anghunk/clipper-hub/blob/main/public/icon/128.png?raw=true" alt="Logo" width="80" height="80">
+  </a>
 
-## Clipper Hub - 万能剪藏
+  <h1>Clipper Hub - 万能剪藏</h1>
+
+  <p>
+    <a href="https://discord.gg/3wDmhCsVeU">Discord</a>
+    ·
+    <a href="https://clipper-hub.netlify.app">使用文档</a>
+    ·
+    <a href="https://github.com/anghunk/clipper-hub/issues/new/choose">问题反馈</a>
+    ·
+    <a href="https://github.com/anghunk/clipper-hub/releases/latest">最新版本</a>
+  </p>
+
+  <p>
+    <img src="https://img.shields.io/github/v/release/anghunk/clipper-hub?logo=github&label=Version">
+    <img src="https://img.shields.io/github/stars/anghunk/clipper-hub?logo=github&style=flat&label=Stars">
+    <img src="https://img.shields.io/chrome-web-store/users/hnpnidoofhkekffllchemjiiffpafhhd?style=flat&logo=googlechrome&label=ChromeWebStore">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue?logo=apache">
+  </p>
+</div>
+
+安装：
+[Chrome Web Store](https://chromewebstore.google.com/detail/hnpnidoofhkekffllchemjiiffpafhhd) / 
+[Firefox Addons](https://addons.mozilla.org/zh-CN/firefox/addon/clipper-hub/)
+
 
 > 将网页内容一键收藏至多个平台的浏览器扩展，支持 Telegram、Discord、Notion 等多个平台，让你的灵感和收藏无处不在。
-
-正在申请商店发布中，请耐心等待~~
 
 ![previews](https://github.com/user-attachments/assets/5b6678fe-aff9-4220-aac1-813777c80f23)
 
@@ -12,7 +36,7 @@
 
 ### 🎯 核心功能
 
-- **多平台支持** - 同时发送到 Telegram、Discord 等多个平台
+- **多平台支持** - 同时发送到 Telegram、Discord、Notion 等多个平台
 - **快速发送** - Popup 快捷输入框，直接发送消息
 - **右键菜单** - 选中文字后右键发送
 - **编辑模式** - 发送前编辑内容，添加自定义标题
