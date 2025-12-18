@@ -240,7 +240,11 @@ async function handleSave() {
     .filter((line) => !line.startsWith("来源:"))
     .join("\n");
 
-  // 格式化消息 - 智能处理换行
+  // 如果内容只是 URL（收藏网址的情况），则不添加内容
+  const isUrlOnly = editedContent.trim() && editData.value?.url && 
+                    editedContent.trim() === editData.value.url.trim();
+
+  // 格式化消息
   const parts = [];
   
   // 添加标题
@@ -248,8 +252,8 @@ async function handleSave() {
     parts.push(customTitle);
   }
   
-  // 添加内容
-  if (editedContent.trim()) {
+  // 添加内容（仅当内容不是 URL 时）
+  if (editedContent.trim() && !isUrlOnly) {
     parts.push(editedContent);
   }
   

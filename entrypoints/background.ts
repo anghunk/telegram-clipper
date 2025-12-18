@@ -245,11 +245,10 @@ async function sendToSelected(text: string, platforms: PlatformType[]): Promise<
 function bookmarkPage(tab: any) {
   const title = tab.title || "无标题";
   const url = tab.url || "";
-  const message = `${title}\n\n${url}`;
   
-  // 打开编辑页面预览内容
+  // 收藏网址时，内容只是 URL，不包含标题
   browserAPI.storage.local.set({
-    'edit_content': message,
+    'edit_content': url,
     'edit_content_html': '',
     'edit_url': url,
     'edit_title': title
