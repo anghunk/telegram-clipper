@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clipper Hub - 数据收集同意</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      padding: 40px;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+    
+    .description {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+    
+    .data-list {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .data-list h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .data-list ul {
+      list-style: none;
+    }
+    
+    .data-list li {
+      color: #555;
+      padding: 8px 0;
+      padding-left: 24px;
+      position: relative;
+    }
+    
+    .data-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #667eea;
+      font-weight: bold;
+    }
+    
+    .notice {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin-bottom: 30px;
+      color: #856404;
+      border-radius: 4px;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+    }
+    
+    button {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .btn-accept {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-accept:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-decline {
+      background: #e0e0e0;
+      color: #666;
+    }
+    
+    .btn-decline:hover {
+      background: #d0d0d0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>欢迎使用 Clipper Hub</h1>
+    
+    <p class="description">
+      Clipper Hub 是一个帮助您收藏网页内容的浏览器扩展。为了提供此功能,我们需要访问以下数据:
+    </p>
+    
+    <div class="data-list">
+      <h3>我们会收集的数据:</h3>
+      <ul>
+        <li><strong>选中的文本内容</strong> - 您在网页上选择并希望收藏的文字</li>
+        <li><strong>网页URL和标题</strong> - 当前页面的地址和标题,用于收藏链接</li>
+        <li><strong>网页内容</strong> - 用于提取和处理您选中的内容(包括格式、图片等)</li>
+      </ul>
+    </div>
+    
+    <div class="notice">
+      <strong>隐私承诺:</strong> 所有数据仅用于您配置的收藏平台(如Telegram、Discord、Notion),不会发送到其他任何服务器。所有配置信息仅存储在您的本地浏览器中。
+    </div>
+    
+    <div class="buttons">
+      <button class="btn-decline" id="declineBtn">拒绝</button>
+      <button class="btn-accept" id="acceptBtn">接受并继续</button>
+    </div>
+  </div>
+  
+  <script>
+    // 数据收集同意页面逻辑
+    const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
+    // 检查是否已经同意
+    browserAPI.storage.local.get('data_consent', (result) => {
+      if (result.data_consent === true) {
+        // 已同意,跳转到选项页面
+        window.location.href = 'options.html';
+      }
+    });
+
+    // 接受按钮
+    document.getElementById('acceptBtn').addEventListener('click', () => {
+      browserAPI.storage.local.set({ data_consent: true }, () => {
+        // 保存同意状态后跳转到选项页
+        window.location.href = 'options.html';
+      });
+    });
+
+    // 拒绝按钮
+    document.getElementById('declineBtn').addEventListener('click', () => {
+      browserAPI.storage.local.set({ data_consent: false }, () => {
+        // 显示拒绝提示
+        alert('您已拒绝数据收集。扩展功能将无法正常使用,页面将关闭。');
+        window.close();
+      });
+    });
+  </script>
+</body>
+</html>

@@ -17,8 +17,7 @@
     "isolatedModules": true,
     "types": [
       "chrome",
-      "node",
-      "wxt/client"
+      "node"
     ],
     "baseUrl": ".",
     "paths": {

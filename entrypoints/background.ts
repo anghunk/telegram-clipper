@@ -5,8 +5,24 @@ import { sendToAllEnabled, hasAnyConfigured, type SendResult, type PlatformType 
 export default defineBackground(() => {
   console.log('Clipper Hub - 万能剪藏 - 后台服务启动', { id: browser.runtime.id });
 
-  // Create context menu when extension is installed
-  browser.runtime.onInstalled.addListener(() => {
+  // 首次安装时检查数据收集同意状态
+  browser.runtime.onInstalled.addListener((details) => {
+    if (details.reason === 'install') {
+      // 首次安装,检查是否需要显示同意页面
+      browser.storage.local.get('data_consent', (result) => {
+        if (result.data_consent !== true) {
+          // 未同意,打开同意页面
+          browser.tabs.create({ url: 'consent.html' });
+        }
+      });
+    }
+
+    // Create context menu
+    createContextMenus();
+  });
+
+  // 创建右键菜单
+  function createContextMenus() {
     // Parent menu
     browser.contextMenus.create({
       id: "telegramParent",
@@ -37,19 +53,29 @@ export default defineBackground(() => {
       title: "收藏网址",
       contexts: ["page"]
     });
-  });
+  }
 
   // Handle context menu clicks
   browser.contextMenus.onClicked.addListener((info, tab) => {
-    if (info.menuItemId === "sendToTelegram" && info.selectionText) {
-      getSelectionWithLineBreaks(tab, (text) => {
-        sendToAllPlatforms(text || info.selectionText || '');
-      });
-    } else if (info.menuItemId === "editBeforeSend" && info.selectionText && tab) {
-      openEditPage(info.selectionText, tab.url || '');
-    } else if (info.menuItemId === "bookmarkPage" && tab) {
-      bookmarkPage(tab);
-    }
+    // 检查用户是否同意数据收集
+    browser.storage.local.get('data_consent', (result) => {
+      if (result.data_consent !== true) {
+        // 未同意,打开同意页面
+        browser.tabs.create({ url: 'consent.html' });
+        return;
+      }
+
+      // 已同意,执行操作
+      if (info.menuItemId === "sendToTelegram" && info.selectionText) {
+        getSelectionWithLineBreaks(tab, (text) => {
+          sendToAllPlatforms(text || info.selectionText || '');
+        });
+      } else if (info.menuItemId === "editBeforeSend" && info.selectionText && tab) {
+        openEditPage(info.selectionText, tab.url || '');
+      } else if (info.menuItemId === "bookmarkPage" && tab) {
+        bookmarkPage(tab);
+      }
+    });
   });
 
   // Listen for messages from options/edit pages

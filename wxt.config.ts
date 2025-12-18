@@ -37,7 +37,10 @@ export default defineConfig({
 			gecko: {
 				// @ts-ignore - data_collection_permissions 是 Firefox 要求的新属性
 				data_collection_permissions: {
-					required: ['none'],
+					required: [
+						'browsingActivity',  // 需要访问网页内容和选中的文本
+						'websiteContent'     // 需要读取和处理网页内容
+					],
 				},
 			} as any,
 		},
