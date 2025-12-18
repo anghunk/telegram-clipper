@@ -439,3 +439,95 @@ button:disabled {
   cursor: pointer;
   accent-color: #3390ec;
 }
+
+/* 平台选择器 */
+.platform-selector {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f9f9fa;
+  border-radius: 8px;
+  border: 1px solid #e4e4e5;
+}
+
+.selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.selector-header label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #707579;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.toggle-all-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: transparent;
+  color: #3390ec;
+  border: 1px solid #3390ec;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0;
+  width: auto;
+  font-weight: 500;
+}
+
+.toggle-all-btn:hover {
+  background: #3390ec;
+  color: white;
+}
+
+.platform-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.platform-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1.5px solid #e4e4e5;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #707579;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0;
+  width: auto;
+}
+
+.platform-chip:hover {
+  border-color: #3390ec;
+  background: #f0f7ff;
+}
+
+.platform-chip.active {
+  background: #3390ec;
+  border-color: #3390ec;
+  color: white;
+}
+
+.platform-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.platform-name {
+  font-weight: 500;
+}
+
+.check-icon {
+  flex-shrink: 0;
+  margin-left: 2px;
+}

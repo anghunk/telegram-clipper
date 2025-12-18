@@ -34,11 +34,37 @@
           rows="6"
           @keydown.ctrl.enter="sendQuickMessage"
         ></textarea>
+        
+        <!-- 平台选择 -->
+        <div v-if="availablePlatforms.length > 0" class="platform-selector">
+          <div class="selector-header">
+            <label>发送到:</label>
+            <button @click="toggleAll" class="toggle-all-btn" type="button">
+              {{ selectedPlatforms.length === availablePlatforms.length ? '取消全选' : '全选' }}
+            </button>
+          </div>
+          <div class="platform-chips">
+            <button
+              v-for="platform in availablePlatforms"
+              :key="platform.id"
+              @click="togglePlatform(platform.id)"
+              :class="['platform-chip', { active: selectedPlatforms.includes(platform.id) }]"
+              type="button"
+            >
+              <!-- <span class="platform-icon">{{ platform.icon }}</span> -->
+              <span class="platform-name">{{ platform.name }}</span>
+              <!-- <svg v-if="selectedPlatforms.includes(platform.id)" class="check-icon" viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg> -->
+            </button>
+          </div>
+        </div>
+        
         <div class="input-footer">
           <button
             @click="sendQuickMessage"
             class="btn-send"
-            :disabled="!quickMessage.trim() || !isConfigured || isSending"
+            :disabled="!quickMessage.trim() || !isConfigured || isSending || selectedPlatforms.length === 0"
           >
             <svg v-if="!isSending" viewBox="0 0 24 24" width="16" height="16">
               <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
@@ -74,7 +100,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { browser } from "wxt/browser";
-import { hasAnyConfigured } from "@/lib/platforms";
+import { hasAnyConfigured, loadAllConfigs, getAllPlatforms, type PlatformType } from "@/lib/platforms";
 
 const browserAPI = browser;
 
@@ -86,6 +112,10 @@ const isSending = ref(false);
 // 通用状态
 const statusMessage = ref("");
 const statusType = ref("info");
+
+// 平台选择
+const availablePlatforms = ref<Array<{ id: PlatformType; name: string; icon: string; enabled: boolean }>>([]);
+const selectedPlatforms = ref<PlatformType[]>([]);
 
 onMounted(() => {
   restoreSettings();
@@ -102,6 +132,22 @@ function openSettings() {
 async function restoreSettings() {
   try {
     isConfigured.value = await hasAnyConfigured();
+    
+    // 加载所有已启用的平台
+    const configs = await loadAllConfigs();
+    const platforms = getAllPlatforms();
+    
+    availablePlatforms.value = platforms
+      .filter(p => configs[p.meta.id].enabled)
+      .map(p => ({
+        id: p.meta.id,
+        name: p.meta.name,
+        icon: p.meta.icon,
+        enabled: configs[p.meta.id].enabled
+      }));
+    
+    // 默认选中所有已启用的平台
+    selectedPlatforms.value = availablePlatforms.value.map(p => p.id);
   } catch (error) {
     console.error("加载配置失败:", error);
   }
@@ -120,11 +166,17 @@ async function sendQuickMessage() {
     return;
   }
 
+  if (selectedPlatforms.value.length === 0) {
+    showStatus("请至少选择一个平台", "error");
+    return;
+  }
+
   isSending.value = true;
   try {
     const response = (await browserAPI.runtime.sendMessage({
-      action: "sendToAllPlatforms",
+      action: "sendToSelectedPlatforms",
       text: quickMessage.value,
+      platforms: selectedPlatforms.value,
     })) as { success: boolean; results?: Record<string, any> };
     
     if (response && response.success) {
@@ -154,6 +206,11 @@ async function sendQuickMessage() {
 
 // 收藏当前页面
 async function sendCurrentPage() {
+  if (selectedPlatforms.value.length === 0) {
+    showStatus("请至少选择一个平台", "error");
+    return;
+  }
+
   isSending.value = true;
   try {
     const tabs = await browserAPI.tabs.query({ active: true, currentWindow: true });
@@ -163,8 +220,9 @@ async function sendCurrentPage() {
       const message = `${currentTab.title}\n\n${currentTab.url}`;
 
       const response = (await browserAPI.runtime.sendMessage({
-        action: "sendToAllPlatforms",
+        action: "sendToSelectedPlatforms",
         text: message,
+        platforms: selectedPlatforms.value,
       })) as { success: boolean; results?: Record<string, any> };
       
       if (response && response.success) {
@@ -188,6 +246,25 @@ async function sendCurrentPage() {
     showStatus(`❌ 错误: ${error.message}`, "error");
   } finally {
     isSending.value = false;
+  }
+}
+
+// 切换平台选择
+function togglePlatform(platformId: PlatformType) {
+  const index = selectedPlatforms.value.indexOf(platformId);
+  if (index > -1) {
+    selectedPlatforms.value.splice(index, 1);
+  } else {
+    selectedPlatforms.value.push(platformId);
+  }
+}
+
+// 全选/取消全选
+function toggleAll() {
+  if (selectedPlatforms.value.length === availablePlatforms.value.length) {
+    selectedPlatforms.value = [];
+  } else {
+    selectedPlatforms.value = availablePlatforms.value.map(p => p.id);
   }
 }
 

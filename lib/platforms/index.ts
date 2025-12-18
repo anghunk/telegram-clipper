@@ -209,6 +209,50 @@ export async function sendToAllEnabled(text: string): Promise<Record<PlatformTyp
 }
 
 /**
+ * 向指定的多个平台发送消息
+ */
+export async function sendToSelectedPlatforms(
+	text: string,
+	selectedPlatforms: PlatformType[],
+): Promise<Record<PlatformType, SendResult>> {
+	const configs = await loadAllConfigs();
+	const results: Record<string, SendResult> = {};
+
+	for (const platformType of selectedPlatforms) {
+		const config = configs[platformType];
+		const platform = platforms[platformType];
+
+		if (!platform) {
+			results[platformType] = {
+				success: false,
+				error: '平台不存在',
+			};
+			continue;
+		}
+
+		if (!config.enabled) {
+			results[platformType] = {
+				success: false,
+				error: `${platform.meta.name} 未启用`,
+			};
+			continue;
+		}
+
+		if (!platform.validateConfig(config)) {
+			results[platformType] = {
+				success: false,
+				error: `${platform.meta.name} 配置不完整`,
+			};
+			continue;
+		}
+
+		results[platformType] = await platform.sendMessage(text, config);
+	}
+
+	return results as Record<PlatformType, SendResult>;
+}
+
+/**
  * 向指定平台发送消息
  */
 export async function sendToPlatform(type: PlatformType, text: string): Promise<SendResult> {

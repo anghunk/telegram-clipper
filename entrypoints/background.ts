@@ -1,6 +1,6 @@
 import { defineBackground } from '#imports';
 import { browser } from 'wxt/browser';
-import { sendToAllEnabled, hasAnyConfigured, type SendResult, type PlatformType } from '@/lib/platforms';
+import { sendToAllEnabled, sendToSelectedPlatforms, hasAnyConfigured, type SendResult, type PlatformType } from '@/lib/platforms';
 
 export default defineBackground(() => {
   console.log('Clipper Hub - 万能剪藏 - 后台服务启动', { id: browser.runtime.id });
@@ -89,6 +89,12 @@ export default defineBackground(() => {
         sendResponse({ success: true, results });
       });
       return true; // 保持消息通道开放用于异步响应
+    } else if (request.action === 'sendToSelectedPlatforms') {
+      // 发送到选定的平台
+      sendToSelected(request.text, request.platforms).then(results => {
+        sendResponse({ success: true, results });
+      });
+      return true; // 保持消息通道开放用于异步响应
     }
     return true;
   });
@@ -172,6 +178,40 @@ async function sendToAllPlatforms(text: string): Promise<Record<PlatformType, Se
 
   try {
     const results = await sendToAllEnabled(text);
+    
+    // 统计发送结果
+    const successPlatforms: string[] = [];
+    const failedPlatforms: string[] = [];
+    
+    for (const [platform, result] of Object.entries(results)) {
+      if (result.success) {
+        successPlatforms.push(platform);
+      } else {
+        failedPlatforms.push(`${platform}: ${result.error}`);
+      }
+    }
+    
+    // 显示通知
+    if (successPlatforms.length > 0 && failedPlatforms.length === 0) {
+      showNotification("发送成功", `消息已发送到: ${successPlatforms.join(', ')}`);
+    } else if (successPlatforms.length > 0 && failedPlatforms.length > 0) {
+      showNotification("部分发送成功", `成功: ${successPlatforms.join(', ')}\n失败: ${failedPlatforms.join(', ')}`);
+    } else {
+      showNotification("发送失败", failedPlatforms.join('\n'));
+    }
+    
+    return results;
+  } catch (error: any) {
+    console.error("Send Error:", error);
+    showNotification("发送失败", error.message || "未知错误");
+    return {} as Record<PlatformType, SendResult>;
+  }
+}
+
+// 发送消息到选定的平台
+async function sendToSelected(text: string, platforms: PlatformType[]): Promise<Record<PlatformType, SendResult>> {
+  try {
+    const results = await sendToSelectedPlatforms(text, platforms);
     
     // 统计发送结果
     const successPlatforms: string[] = [];

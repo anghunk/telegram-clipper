@@ -27,7 +27,6 @@
 [Chrome Web Store](https://chromewebstore.google.com/detail/hnpnidoofhkekffllchemjiiffpafhhd) / 
 [Firefox Addons](https://addons.mozilla.org/zh-CN/firefox/addon/clipper-hub/)
 
-
 > 将网页内容一键收藏至多个平台的浏览器扩展，支持 Telegram、Discord、Notion 等多个平台，让你的灵感和收藏无处不在。
 
 ![previews](https://github.com/user-attachments/assets/5b6678fe-aff9-4220-aac1-813777c80f23)

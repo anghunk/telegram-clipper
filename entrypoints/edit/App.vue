@@ -30,9 +30,34 @@
       </div>
     </div>
 
+    <!-- 平台选择 -->
+    <div v-if="availablePlatforms.length > 0" class="platform-selector">
+      <div class="selector-header">
+        <label>发送到:</label>
+        <button @click="toggleAll" class="toggle-all-btn" type="button">
+          {{ selectedPlatforms.length === availablePlatforms.length ? '取消全选' : '全选' }}
+        </button>
+      </div>
+      <div class="platform-chips">
+        <button
+          v-for="platform in availablePlatforms"
+          :key="platform.id"
+          @click="togglePlatform(platform.id)"
+          :class="['platform-chip', { active: selectedPlatforms.includes(platform.id) }]"
+          type="button"
+        >
+          <!-- <span class="platform-icon">{{ platform.icon }}</span> -->
+          <span class="platform-name">{{ platform.name }}</span>
+          <!-- <svg v-if="selectedPlatforms.includes(platform.id)" class="check-icon" viewBox="0 0 24 24" width="16" height="16">
+            <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+          </svg> -->
+        </button>
+      </div>
+    </div>
+
     <div class="button-group">
       <button @click="handleCancel" class="btn btn-secondary">取消</button>
-      <button @click="handleSave" :disabled="isSending" class="btn btn-primary">
+      <button @click="handleSave" :disabled="isSending || selectedPlatforms.length === 0" class="btn btn-primary">
         <svg v-if="!isSending" viewBox="0 0 24 24" width="16" height="16">
           <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
         </svg>
@@ -47,6 +72,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { browser } from "wxt/browser";
 import { ElMessage } from 'element-plus';
+import { loadAllConfigs, getAllPlatforms, type PlatformType } from "@/lib/platforms";
 
 const browserAPI = browser;
 
@@ -61,12 +87,19 @@ const editData = ref<{
   pageTitle: string;
 } | null>(null);
 
+// 平台选择
+const availablePlatforms = ref<Array<{ id: PlatformType; name: string; icon: string; enabled: boolean }>>([]);
+const selectedPlatforms = ref<PlatformType[]>([]);
+
 onMounted(async () => {
   await loadEditData();
   // 自动聚焦到标题输入框
   setTimeout(() => {
     document.getElementById("titleInput")?.focus();
   }, 100);
+  
+  // 加载平台配置
+  await loadPlatforms();
 });
 
 onUnmounted(() => {
@@ -80,6 +113,27 @@ onUnmounted(() => {
 });
 
 // 移除了设置加载和切换功能，始终包含来源
+
+async function loadPlatforms() {
+  try {
+    const configs = await loadAllConfigs();
+    const platforms = getAllPlatforms();
+    
+    availablePlatforms.value = platforms
+      .filter(p => configs[p.meta.id].enabled)
+      .map(p => ({
+        id: p.meta.id,
+        name: p.meta.name,
+        icon: p.meta.icon,
+        enabled: configs[p.meta.id].enabled
+      }));
+    
+    // 默认选中所有已启用的平台
+    selectedPlatforms.value = availablePlatforms.value.map(p => p.id);
+  } catch (error) {
+    console.error("加载平台失败:", error);
+  }
+}
 
 async function loadEditData() {
   try {
@@ -164,6 +218,11 @@ async function handleSave() {
     return;
   }
 
+  if (selectedPlatforms.value.length === 0) {
+    ElMessage.error('请至少选择一个平台');
+    return;
+  }
+
   const customTitle = titleInput.value.trim();
   const contentDiv = document.getElementById("contentInput");
 
@@ -208,12 +267,13 @@ async function handleSave() {
   // 用双换行连接各部分
   const message = parts.join("\n\n");
 
-  // 发送到所有已启用的平台
+  // 发送到选定的平台
   isSending.value = true;
   try {
     const response = (await browserAPI.runtime.sendMessage({
-      action: "sendToAllPlatforms",
+      action: "sendToSelectedPlatforms",
       text: message,
+      platforms: selectedPlatforms.value,
     })) as { success?: boolean; results?: Record<string, { success: boolean; error?: string }> };
     
     if (response && response.success) {
@@ -255,6 +315,25 @@ async function handleSave() {
     ElMessage.error('发送失败，请重试');
   } finally {
     isSending.value = false;
+  }
+}
+
+// 切换平台选择
+function togglePlatform(platformId: PlatformType) {
+  const index = selectedPlatforms.value.indexOf(platformId);
+  if (index > -1) {
+    selectedPlatforms.value.splice(index, 1);
+  } else {
+    selectedPlatforms.value.push(platformId);
+  }
+}
+
+// 全选/取消全选
+function toggleAll() {
+  if (selectedPlatforms.value.length === availablePlatforms.value.length) {
+    selectedPlatforms.value = [];
+  } else {
+    selectedPlatforms.value = availablePlatforms.value.map(p => p.id);
   }
 }
 
@@ -548,5 +627,96 @@ button:disabled {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* 平台选择器 */
+.platform-selector {
+  margin: 12px 20px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e4e4e5;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.selector-header label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #707579;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.toggle-all-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: transparent;
+  color: #3390ec;
+  border: 1px solid #3390ec;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: auto;
+  font-weight: 500;
+}
+
+.toggle-all-btn:hover {
+  background: #3390ec;
+  color: white;
+}
+
+.platform-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.platform-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f4f4f5;
+  border: 1.5px solid #e4e4e5;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #707579;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: auto;
+}
+
+.platform-chip:hover {
+  border-color: #3390ec;
+  background: #f0f7ff;
+}
+
+.platform-chip.active {
+  background: #3390ec;
+  border-color: #3390ec;
+  color: white;
+}
+
+.platform-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.platform-name {
+  font-weight: 500;
+}
+
+.check-icon {
+  flex-shrink: 0;
+  margin-left: 2px;
 }
 </style>
