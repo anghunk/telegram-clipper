@@ -21,6 +21,10 @@ export default defineConfig({
 			'import.meta.env.VITE_NOTION_INTEGRATION_TOKEN': JSON.stringify(process.env.VITE_NOTION_INTEGRATION_TOKEN || ''),
 			'import.meta.env.VITE_NOTION_DATABASE_ID': JSON.stringify(process.env.VITE_NOTION_DATABASE_ID || ''),
 		},
+		esbuild: {
+			// 生产环境移除 console 和 debugger
+			drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+		},
 	}),
 	modules: ['@wxt-dev/module-vue'],
 	manifest: {

@@ -37,26 +37,48 @@
         
         <!-- 平台选择 -->
         <div v-if="availablePlatforms.length > 0" class="platform-selector">
-          <div class="selector-header">
-            <label>发送到:</label>
-            <button @click="toggleAll" class="toggle-all-btn" type="button">
-              {{ selectedPlatforms.length === availablePlatforms.length ? '取消全选' : '全选' }}
-            </button>
-          </div>
-          <div class="platform-chips">
-            <button
-              v-for="platform in availablePlatforms"
-              :key="platform.id"
-              @click="togglePlatform(platform.id)"
-              :class="['platform-chip', { active: selectedPlatforms.includes(platform.id) }]"
-              type="button"
+          <div class="platform-dropdown" ref="dropdownRef">
+            <button 
+              type="button" 
+              class="dropdown-trigger" 
+              @click="toggleDropdown"
+              :class="{ active: isDropdownOpen }"
             >
-              <!-- <span class="platform-icon">{{ platform.icon }}</span> -->
-              <span class="platform-name">{{ platform.name }}</span>
-              <!-- <svg v-if="selectedPlatforms.includes(platform.id)" class="check-icon" viewBox="0 0 24 24" width="16" height="16">
-                <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg> -->
+              <span class="trigger-label">发送到:</span>
+              <span class="trigger-value">
+                {{ selectedPlatforms.length === 0 ? '请选择平台' : 
+                   selectedPlatforms.length === availablePlatforms.length ? '全部平台' :
+                   getSelectedPlatformNames() }}
+              </span>
+              <svg class="dropdown-arrow" :class="{ open: isDropdownOpen }" viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+              </svg>
             </button>
+            <div v-show="isDropdownOpen" class="dropdown-menu">
+              <div class="dropdown-header">
+                <button @click="toggleAll" class="toggle-all-btn" type="button">
+                  {{ selectedPlatforms.length === availablePlatforms.length ? '取消全选' : '全选' }}
+                </button>
+              </div>
+              <div class="dropdown-options">
+                <label
+                  v-for="platform in availablePlatforms"
+                  :key="platform.id"
+                  class="dropdown-option"
+                  :class="{ selected: selectedPlatforms.includes(platform.id) }"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="selectedPlatforms.includes(platform.id)"
+                    @change="togglePlatform(platform.id)"
+                  />
+                  <span class="option-name">{{ platform.name }}</span>
+                  <svg v-if="selectedPlatforms.includes(platform.id)" class="check-icon" viewBox="0 0 24 24" width="16" height="16">
+                    <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -77,15 +99,8 @@
 
       <!-- 快捷操作 -->
       <div class="quick-actions">
-        <button @click="sendCurrentPage" class="action-btn" :disabled="!isConfigured || isSending">
-          <svg v-if="!isSending" viewBox="0 0 24 24" width="16" height="16">
-            <path
-              fill="currentColor"
-              d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"
-            />
-          </svg>
-          <span v-if="isSending" class="spinner"></span>
-          {{ isSending ? '发送中...' : '收藏当前页面' }}
+        <button @click="sendCurrentPage" class="action-btn" :disabled="!isConfigured">
+          收藏当前页面
         </button>
       </div>
 
@@ -98,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { browser } from "wxt/browser";
 import { hasAnyConfigured, loadAllConfigs, getAllPlatforms, type PlatformType } from "@/lib/platforms";
 
@@ -116,9 +131,36 @@ const statusType = ref("info");
 // 平台选择
 const availablePlatforms = ref<Array<{ id: PlatformType; name: string; icon: string; enabled: boolean }>>([]);
 const selectedPlatforms = ref<PlatformType[]>([]);
+const isDropdownOpen = ref(false);
+const dropdownRef = ref<HTMLElement | null>(null);
+
+// 获取已选平台名称
+function getSelectedPlatformNames() {
+  return selectedPlatforms.value
+    .map(id => availablePlatforms.value.find(p => p.id === id)?.name)
+    .filter(Boolean)
+    .join(', ');
+}
+
+// 切换下拉框
+function toggleDropdown() {
+  isDropdownOpen.value = !isDropdownOpen.value;
+}
+
+// 点击外部关闭下拉框
+function handleClickOutside(event: MouseEvent) {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+    isDropdownOpen.value = false;
+  }
+}
 
 onMounted(() => {
   restoreSettings();
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
 });
 
 // 打开设置页面
@@ -251,48 +293,36 @@ async function sendQuickMessage() {
   }
 }
 
-// 收藏当前页面
+// 收藏当前页面 - 打开编辑弹窗
 async function sendCurrentPage() {
-  if (selectedPlatforms.value.length === 0) {
-    showStatus("请至少选择一个平台", "error");
-    return;
-  }
-
-  isSending.value = true;
   try {
     const tabs = await browserAPI.tabs.query({ active: true, currentWindow: true });
     const currentTab = tabs[0];
 
-    if (currentTab) {
-      const message = `${currentTab.title}\n\n${currentTab.url}`;
+    if (currentTab && currentTab.url) {
+      // 将页面信息存储到 storage，供 edit 页面使用
+      await browserAPI.storage.local.set({
+        edit_content: currentTab.url,  // 内容是 URL
+        edit_content_html: '',
+        edit_url: currentTab.url,
+        edit_title: currentTab.title || '',
+      });
 
-      const response = (await browserAPI.runtime.sendMessage({
-        action: "sendToSelectedPlatforms",
-        text: message,
-        platforms: selectedPlatforms.value,
-      })) as { success: boolean; results?: Record<string, any> };
-      
-      if (response && response.success) {
-        const results = response.results || {};
-        const successCount = Object.values(results).filter((r: any) => r.success).length;
-        const totalCount = Object.keys(results).length;
-        
-        if (successCount > 0) {
-          showStatus(`✅ 页面已收藏 (${successCount}/${totalCount} 个平台)`, "success");
-          setTimeout(() => {
-            statusMessage.value = "";
-          }, 3000);
-        } else {
-          showStatus("❌ 所有平台发送失败", "error");
-        }
-      } else {
-        showStatus("❌ 发送失败", "error");
-      }
+      // 打开编辑页面
+      await browserAPI.windows.create({
+        url: '/edit.html',
+        type: 'popup',
+        width: 500,
+        height: 600,
+      });
+
+      // 关闭 popup
+      window.close();
+    } else {
+      showStatus("无法获取当前页面信息", "error");
     }
   } catch (error: any) {
     showStatus(`❌ 错误: ${error.message}`, "error");
-  } finally {
-    isSending.value = false;
   }
 }
 

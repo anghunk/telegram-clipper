@@ -443,26 +443,97 @@ button:disabled {
 /* 平台选择器 */
 .platform-selector {
   margin-top: 12px;
-  padding: 12px;
-  background: #f9f9fa;
-  border-radius: 8px;
-  border: 1px solid #e4e4e5;
 }
 
-.selector-header {
+.platform-dropdown {
+  position: relative;
+}
+
+.dropdown-trigger {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
+  width: 100%;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #e4e4e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-.selector-header label {
-  margin: 0;
+.dropdown-trigger:hover {
+  border-color: #3390ec;
+  background: #f0f7ff;
+}
+
+.dropdown-trigger.active {
+  border-color: #3390ec;
+  background: #f0f7ff;
+}
+
+.trigger-label {
   font-size: 12px;
   font-weight: 500;
   color: #707579;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.trigger-value {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: #000;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-arrow {
+  color: #707579;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e4e4e5;
+  background: #f9f9fa;
 }
 
 .toggle-all-btn {
@@ -484,45 +555,46 @@ button:disabled {
   color: white;
 }
 
-.platform-chips {
+.dropdown-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown-options .dropdown-option {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.platform-chip {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: #ffffff;
-  border: 1.5px solid #e4e4e5;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 400;
-  color: #707579;
+  padding: 10px 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.15s;
+  gap: 10px;
+  text-transform: capitalize;
   margin: 0;
-  width: auto;
 }
 
-.platform-chip:hover {
-  border-color: #3390ec;
-  background: #f0f7ff;
+.dropdown-options .dropdown-option:hover {
+  background: #f4f4f5;
 }
 
-.platform-chip.active {
-  background: #3390ec;
-  border-color: #3390ec;
-  color: white;
+.dropdown-options .dropdown-option.selected {
+  background: #e8f4fd;
 }
 
-.platform-name {
-  font-weight: 500;
-}
-
-.check-icon {
+.dropdown-options .dropdown-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #3390ec;
+  cursor: pointer;
   flex-shrink: 0;
-  margin-left: 2px;
+}
+
+.option-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+}
+
+.dropdown-options .dropdown-option .check-icon {
+  color: #3390ec;
+  flex-shrink: 0;
 }

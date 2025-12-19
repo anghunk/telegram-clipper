@@ -35,28 +35,48 @@
 
     <!-- 平台选择 -->
     <div v-if="availablePlatforms.length > 0" class="platform-selector">
-      <div class="selector-header">
-        <label>发送到:</label>
-        <button @click="toggleAll" class="toggle-all-btn" type="button">
-          {{
-            selectedPlatforms.length === availablePlatforms.length ? "取消全选" : "全选"
-          }}
-        </button>
-      </div>
-      <div class="platform-chips">
-        <button
-          v-for="platform in availablePlatforms"
-          :key="platform.id"
-          @click="togglePlatform(platform.id)"
-          :class="['platform-chip', { active: selectedPlatforms.includes(platform.id) }]"
-          type="button"
+      <div class="platform-dropdown" ref="dropdownRef">
+        <button 
+          type="button" 
+          class="dropdown-trigger" 
+          @click="toggleDropdown"
+          :class="{ active: isDropdownOpen }"
         >
-          <!-- <span class="platform-icon">{{ platform.icon }}</span> -->
-          <span class="platform-name">{{ platform.name }}</span>
-          <!-- <svg v-if="selectedPlatforms.includes(platform.id)" class="check-icon" viewBox="0 0 24 24" width="16" height="16">
-            <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-          </svg> -->
+          <span class="trigger-label">发送到:</span>
+          <span class="trigger-value">
+            {{ selectedPlatforms.length === 0 ? '请选择平台' : 
+               selectedPlatforms.length === availablePlatforms.length ? '全部平台' :
+               getSelectedPlatformNames() }}
+          </span>
+          <svg class="dropdown-arrow" :class="{ open: isDropdownOpen }" viewBox="0 0 24 24" width="16" height="16">
+            <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+          </svg>
         </button>
+        <div v-show="isDropdownOpen" class="dropdown-menu">
+          <div class="dropdown-header">
+            <button @click="toggleAll" class="toggle-all-btn" type="button">
+              {{ selectedPlatforms.length === availablePlatforms.length ? '取消全选' : '全选' }}
+            </button>
+          </div>
+          <div class="dropdown-options">
+            <label
+              v-for="platform in availablePlatforms"
+              :key="platform.id"
+              class="dropdown-option"
+              :class="{ selected: selectedPlatforms.includes(platform.id) }"
+            >
+              <input
+                type="checkbox"
+                :checked="selectedPlatforms.includes(platform.id)"
+                @change="togglePlatform(platform.id)"
+              />
+              <span class="option-name">{{ platform.name }}</span>
+              <svg v-if="selectedPlatforms.includes(platform.id)" class="check-icon" viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -71,7 +91,7 @@
           <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
         </svg>
         <span v-if="isSending" class="spinner"></span>
-        {{ isSending ? "发送中..." : "保存并发送到所有平台" }}
+        {{ isSending ? "发送中..." : "发送" }}
       </button>
     </div>
   </div>
@@ -99,6 +119,28 @@ const editData = ref<{
 // 平台选择
 const availablePlatforms = ref<Array<{ id: PlatformType; name: string; icon: string; enabled: boolean }>>([]);
 const selectedPlatforms = ref<PlatformType[]>([]);
+const isDropdownOpen = ref(false);
+const dropdownRef = ref<HTMLElement | null>(null);
+
+// 获取已选平台名称
+function getSelectedPlatformNames() {
+  return selectedPlatforms.value
+    .map(id => availablePlatforms.value.find(p => p.id === id)?.name)
+    .filter(Boolean)
+    .join(', ');
+}
+
+// 切换下拉框
+function toggleDropdown() {
+  isDropdownOpen.value = !isDropdownOpen.value;
+}
+
+// 点击外部关闭下拉框
+function handleClickOutside(event: MouseEvent) {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+    isDropdownOpen.value = false;
+  }
+}
 
 onMounted(async () => {
   await loadEditData();
@@ -109,6 +151,9 @@ onMounted(async () => {
 
   // 加载平台配置
   await loadPlatforms();
+  
+  // 添加点击外部关闭下拉框的事件监听
+  document.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
@@ -119,6 +164,8 @@ onUnmounted(() => {
     "edit_url",
     "edit_title",
   ]);
+  // 移除事件监听
+  document.removeEventListener('click', handleClickOutside);
 });
 
 // 移除了设置加载和切换功能，始终包含来源
@@ -700,27 +747,96 @@ button:disabled {
 /* 平台选择器 */
 .platform-selector {
   margin: 0 20px 10px;
+}
+
+.platform-dropdown {
+  position: relative;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
   padding: 12px;
   background: #ffffff;
-  border-radius: 8px;
   border: 1px solid #e4e4e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  gap: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-.selector-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
+.dropdown-trigger:hover {
+  border-color: #3390ec;
+  background: #f0f7ff;
 }
 
-.selector-header label {
-  margin: 0;
+.dropdown-trigger.active {
+  border-color: #3390ec;
+  background: #f0f7ff;
+}
+
+.trigger-label {
   font-size: 12px;
   font-weight: 500;
   color: #707579;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.trigger-value {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: #000;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-arrow {
+  color: #707579;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e4e4e5;
+  background: #f9f9fa;
 }
 
 .toggle-all-btn {
@@ -741,46 +857,46 @@ button:disabled {
   color: white;
 }
 
-.platform-chips {
+.dropdown-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown-option {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.platform-chip {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: #f4f4f5;
-  border: 1.5px solid #e4e4e5;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 400;
-  color: #707579;
+  padding: 10px 12px;
   cursor: pointer;
-  transition: all 0.2s;
-  height: auto;
+  transition: background 0.15s;
+  gap: 10px;
 }
 
-.platform-chip:hover {
-  border-color: #3390ec;
-  background: #f0f7ff;
+.dropdown-option:hover {
+  background: #f4f4f5;
 }
 
-.platform-chip.active {
-  background: #3390ec;
-  border-color: #3390ec;
-  color: white;
+.dropdown-option.selected {
+  background: #e8f4fd;
 }
 
-.platform-name {
-  font-weight: 500;
-}
-
-.check-icon {
+.dropdown-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #3390ec;
+  cursor: pointer;
   flex-shrink: 0;
-  margin-left: 2px;
+}
+
+.option-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+}
+
+.dropdown-option .check-icon {
+  color: #3390ec;
+  flex-shrink: 0;
 }
 
 /* 来源信息样式 */
