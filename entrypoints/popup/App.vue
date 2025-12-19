@@ -146,8 +146,25 @@ async function restoreSettings() {
         enabled: configs[p.meta.id].enabled
       }));
     
-    // 默认选中所有已启用的平台
-    selectedPlatforms.value = availablePlatforms.value.map(p => p.id);
+    // 从本地存储加载用户上次选择的平台
+    const result = await browserAPI.storage.local.get('selected_platforms');
+    const savedPlatforms = result.selected_platforms;
+    
+    if (savedPlatforms && Array.isArray(savedPlatforms) && savedPlatforms.length > 0) {
+      // 只保留仍然可用的平台
+      const validPlatforms = savedPlatforms.filter(
+        (id: PlatformType) => availablePlatforms.value.some(p => p.id === id)
+      );
+      if (validPlatforms.length > 0) {
+        selectedPlatforms.value = validPlatforms;
+      } else {
+        // 如果没有有效的平台，默认选中所有已启用的平台
+        selectedPlatforms.value = availablePlatforms.value.map(p => p.id);
+      }
+    } else {
+      // 首次使用，默认选中所有已启用的平台
+      selectedPlatforms.value = availablePlatforms.value.map(p => p.id);
+    }
   } catch (error) {
     console.error("加载配置失败:", error);
   }
@@ -287,6 +304,8 @@ function togglePlatform(platformId: PlatformType) {
   } else {
     selectedPlatforms.value.push(platformId);
   }
+  // 保存用户的选择
+  savePlatformSelection();
 }
 
 // 全选/取消全选
@@ -296,6 +315,17 @@ function toggleAll() {
   } else {
     selectedPlatforms.value = availablePlatforms.value.map(p => p.id);
   }
+  // 保存用户的选择
+  savePlatformSelection();
+}
+
+// 保存平台选择到本地存储
+function savePlatformSelection() {
+  // 使用下划线命名避免与变量名冲突，并使用同步方式确保立即保存
+  const platformsToSave = [...selectedPlatforms.value];
+  browserAPI.storage.local.set({ selected_platforms: platformsToSave }).catch(error => {
+    console.error("保存平台选择失败:", error);
+  });
 }
 
 function showStatus(message: string, type: string = "info") {
