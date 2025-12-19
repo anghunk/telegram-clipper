@@ -12,9 +12,12 @@ export default defineConfig({
 		},
 		define: {
 			// 将环境变量注入到浏览器扩展中
+			'import.meta.env.VITE_TELEGRAM_ENABLED': JSON.stringify(process.env.VITE_TELEGRAM_ENABLED || 'false'),
 			'import.meta.env.VITE_TELEGRAM_BOT_TOKEN': JSON.stringify(process.env.VITE_TELEGRAM_BOT_TOKEN || ''),
 			'import.meta.env.VITE_TELEGRAM_CHANNEL_ID': JSON.stringify(process.env.VITE_TELEGRAM_CHANNEL_ID || ''),
+			'import.meta.env.VITE_DISCORD_ENABLED': JSON.stringify(process.env.VITE_DISCORD_ENABLED || 'false'),
 			'import.meta.env.VITE_DISCORD_WEBHOOK_URL': JSON.stringify(process.env.VITE_DISCORD_WEBHOOK_URL || ''),
+			'import.meta.env.VITE_NOTION_ENABLED': JSON.stringify(process.env.VITE_NOTION_ENABLED || 'false'),
 			'import.meta.env.VITE_NOTION_INTEGRATION_TOKEN': JSON.stringify(process.env.VITE_NOTION_INTEGRATION_TOKEN || ''),
 			'import.meta.env.VITE_NOTION_DATABASE_ID': JSON.stringify(process.env.VITE_NOTION_DATABASE_ID || ''),
 		},
