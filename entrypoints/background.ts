@@ -1,5 +1,5 @@
-import { defineBackground } from 'wxt/sandbox';
 import { browser } from 'wxt/browser';
+import { defineBackground } from 'wxt/utils/define-background';
 import { sendToAllEnabled, sendToSelectedPlatforms, hasAnyConfigured, type SendResult, type PlatformType } from '@/lib/platforms';
 
 export default defineBackground(() => {
@@ -67,7 +67,17 @@ export default defineBackground(() => {
     // 已同意,执行操作
     if (info.menuItemId === "sendToTelegram" && info.selectionText) {
       getSelectionWithLineBreaks(tab, (text) => {
-        sendToAllPlatforms(text || info.selectionText || '');
+        // 使用网页标题作为标题，选中文字作为内容
+        const content = text || info.selectionText || '';
+        const url = tab?.url || '';
+        const title = tab?.title || '未命名剪藏';
+        // 格式: 标题\n内容\n来源URL
+        const message = url ? `${title}
+${content}
+
+${url}` : `${title}
+${content}`;
+        sendToAllPlatforms(message);
       });
     } else if (info.menuItemId === "editBeforeSend" && info.selectionText && tab) {
       openEditPage(info.selectionText, tab.url || '');

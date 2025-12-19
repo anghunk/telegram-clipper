@@ -12,21 +12,24 @@
           type="text"
           id="titleInput"
           v-model="titleInput"
-          placeholder="输入标题(可选)"
-          maxlength="100"
+          placeholder="默认抓取网站 title 标题"
+          maxlength="200"
           @keypress.enter="handleSave"
         />
       </div>
 
       <div class="form-group content-group">
         <label>内容编辑</label>
-        <div
-          id="contentInput"
-          class="preview-box"
-          contenteditable="true"
-          v-html="contentHTML"
-          @input="onContentInput"
-        ></div>
+        <div class="content-textarea">
+          <textarea id="contentInput" class="" v-model="contentText"></textarea>
+          <!-- 来源信息单独显示 -->
+          <div v-if="includeSource && editData?.url" class="source-info">
+            <span class="source-label">来源:</span>
+            <a :href="editData.url" target="_blank" class="source-link">{{
+              editData.url
+            }}</a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -35,7 +38,9 @@
       <div class="selector-header">
         <label>发送到:</label>
         <button @click="toggleAll" class="toggle-all-btn" type="button">
-          {{ selectedPlatforms.length === availablePlatforms.length ? '取消全选' : '全选' }}
+          {{
+            selectedPlatforms.length === availablePlatforms.length ? "取消全选" : "全选"
+          }}
         </button>
       </div>
       <div class="platform-chips">
@@ -57,12 +62,16 @@
 
     <div class="button-group">
       <button @click="handleCancel" class="btn btn-secondary">取消</button>
-      <button @click="handleSave" :disabled="isSending || selectedPlatforms.length === 0" class="btn btn-primary">
+      <button
+        @click="handleSave"
+        :disabled="isSending || selectedPlatforms.length === 0"
+        class="btn btn-primary"
+      >
         <svg v-if="!isSending" viewBox="0 0 24 24" width="16" height="16">
           <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
         </svg>
         <span v-if="isSending" class="spinner"></span>
-        {{ isSending ? '发送中...' : '保存并发送到所有平台' }}
+        {{ isSending ? "发送中..." : "保存并发送到所有平台" }}
       </button>
     </div>
   </div>
@@ -77,7 +86,7 @@ import { loadAllConfigs, getAllPlatforms, type PlatformType } from "@/lib/platfo
 const browserAPI = browser;
 
 const titleInput = ref("");
-const contentHTML = ref("");
+const contentText = ref("");
 const includeSource = true; // 默认始终包含来源
 const isSending = ref(false);
 const editData = ref<{
@@ -97,7 +106,7 @@ onMounted(async () => {
   setTimeout(() => {
     document.getElementById("titleInput")?.focus();
   }, 100);
-  
+
   // 加载平台配置
   await loadPlatforms();
 });
@@ -118,7 +127,7 @@ async function loadPlatforms() {
   try {
     const configs = await loadAllConfigs();
     const platforms = getAllPlatforms();
-    
+
     availablePlatforms.value = platforms
       .filter(p => configs[p.meta.id].enabled)
       .map(p => ({
@@ -127,7 +136,7 @@ async function loadPlatforms() {
         icon: p.meta.icon,
         enabled: configs[p.meta.id].enabled
       }));
-    
+
     // 默认选中所有已启用的平台
     selectedPlatforms.value = availablePlatforms.value.map(p => p.id);
   } catch (error) {
@@ -156,60 +165,29 @@ async function loadEditData() {
       titleInput.value = editData.value.pageTitle;
     }
 
-    // 显示内容预览
-    updateContentPreview();
+    // 加载内容文本
+    loadContentText();
   } catch (error) {
     console.error("数据加载失败:", error);
     showError("数据加载失败");
   }
 }
 
-function updateContentPreview() {
+function loadContentText() {
   if (!editData.value) return;
 
-  console.log("=== DEBUG ===");
-  console.log("原始content:", JSON.stringify(editData.value.content));
-  console.log(
-    "contentHTML:",
-    editData.value.contentHTML ? editData.value.contentHTML.substring(0, 200) : "empty"
-  );
-
-  // 如果content没有换行，尝试从contentHTML提取
+  // 如果content没有换行，尝试从 contentHTML提取
   let content = editData.value.content;
   if (content && !content.includes("\n") && editData.value.contentHTML) {
-    console.log("content没有换行，尝试从HTML提取...");
     content = htmlToTextWithBreaks(editData.value.contentHTML);
-    console.log("从HTML提取后:", JSON.stringify(content));
   }
 
-  const url = editData.value.url;
-
-  // 始终使用纯文本（带换行）来显示，确保段落正确
-  if (content && content.trim()) {
-    const lines = content.split("\n");
-    let htmlContent = "";
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line) {
-        htmlContent += `<p style="margin: 0 0 6px 0;">${escapeHtml(line)}</p>`;
-      }
-    }
-
-    // 添加来源信息
-    if (includeSource && url) {
-      htmlContent += `<div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e5ea;"><span style="color: #666; font-size: 13px;">来源: <a href="${url}" target="_blank" style="color: #007aff; text-decoration: none;">${url}</a></span></div>`;
-    }
-
-    contentHTML.value = htmlContent;
+  // 如果内容就是 URL（收藏网址的情况），不显示在内容区域，因为已经在来源栏目显示了
+  if (content && editData.value.url && content.trim() === editData.value.url.trim()) {
+    contentText.value = "";
   } else {
-    contentHTML.value = "无内容";
+    contentText.value = content || "";
   }
-}
-
-function onContentInput(event: Event) {
-  const target = event.target as HTMLDivElement;
-  contentHTML.value = target.innerHTML;
 }
 
 async function handleSave() {
@@ -224,20 +202,12 @@ async function handleSave() {
   }
 
   const customTitle = titleInput.value.trim();
-  const contentDiv = document.getElementById("contentInput");
-
-  // 获取编辑后的内容，并清理多余换行
-  let editedContent = contentDiv?.innerText || contentDiv?.textContent || "";
-  editedContent = editedContent
+  
+  // 获取编辑后的内容
+  let editedContent = contentText.value
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line)
-    .join("\n");
-
-  // 移除内容中的"来源:"行
-  editedContent = editedContent
-    .split("\n")
-    .filter((line) => !line.startsWith("来源:"))
     .join("\n");
 
   // 如果内容只是 URL（收藏网址的情况），则不添加内容
@@ -257,13 +227,13 @@ async function handleSave() {
     parts.push(editedContent);
   }
   
-  // 添加来源链接
+  // 添加来源 URL（如果有的话）
   if (includeSource && editData.value.url) {
-    parts.push(`来源: ${editData.value.url}`);
+    parts.push(editData.value.url);
   }
   
   // 检查是否至少有内容
-  if (parts.length === 0 || (parts.length === 1 && parts[0] === `来源: ${editData.value.url}`)) {
+  if (parts.length === 0) {
     ElMessage.error('内容不能为空');
     return;
   }
@@ -346,9 +316,7 @@ function handleCancel() {
 }
 
 function showError(message: string) {
-  contentHTML.value = `<div style="color: #dc2626; font-weight: 500;">❌ ${escapeHtml(
-    message
-  )}</div>`;
+  contentText.value = `❌ ${message}`;
 }
 
 function escapeHtml(text: string): string {
@@ -461,6 +429,7 @@ function htmlToTextWithBreaks(html: string): string {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  margin: 0;
 }
 
 .form-group label {
@@ -510,7 +479,6 @@ function htmlToTextWithBreaks(html: string): string {
   transition: all 0.2s ease;
   resize: none;
   box-sizing: border-box;
-  min-height: 200px;
   word-wrap: break-word;
   white-space: normal;
   scrollbar-width: thin;
@@ -564,6 +532,70 @@ function htmlToTextWithBreaks(html: string): string {
 .preview-box:focus {
   outline: none;
   border-color: #3390ec;
+}
+
+/* textarea 样式 */
+.content-textarea {
+  flex: 1;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e4e4e5;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #000000;
+  line-height: 1.6;
+  transition: all 0.2s ease;
+  resize: vertical;
+  box-sizing: border-box;
+  scrollbar-color: #c7c7cc #f2f2f7;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.content-textarea textarea {
+  flex: 1;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  resize: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  word-wrap: break-word;
+}
+
+.content-textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content-textarea::-webkit-scrollbar-track {
+  background: #f2f2f7;
+  border-radius: 4px;
+}
+
+.content-textarea::-webkit-scrollbar-thumb {
+  background: #c7c7cc;
+  border-radius: 4px;
+}
+
+.content-textarea::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.content-textarea:focus {
+  outline: none;
+  border-color: #3390ec;
+}
+
+.content-textarea::placeholder {
+  color: #a2acb4;
+  font-style: italic;
 }
 
 .button-group {
@@ -630,12 +662,14 @@ button:disabled {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 平台选择器 */
 .platform-selector {
-  margin: 12px 20px;
+  margin: 0 20px 10px;
   padding: 12px;
   background: #ffffff;
   border-radius: 8px;
@@ -710,11 +744,6 @@ button:disabled {
   color: white;
 }
 
-.platform-icon {
-  font-size: 16px;
-  line-height: 1;
-}
-
 .platform-name {
   font-weight: 500;
 }
@@ -722,5 +751,29 @@ button:disabled {
 .check-icon {
   flex-shrink: 0;
   margin-left: 2px;
+}
+
+/* 来源信息样式 */
+.source-info {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e5ea;
+  font-size: 13px;
+  color: #666;
+}
+
+.source-label {
+  color: #666;
+  margin-right: 4px;
+}
+
+.source-link {
+  color: #007aff;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.source-link:hover {
+  text-decoration: underline;
 }
 </style>

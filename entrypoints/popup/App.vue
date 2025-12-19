@@ -173,29 +173,59 @@ async function sendQuickMessage() {
 
   isSending.value = true;
   try {
-    const response = (await browserAPI.runtime.sendMessage({
-      action: "sendToSelectedPlatforms",
-      text: quickMessage.value,
-      platforms: selectedPlatforms.value,
-    })) as { success: boolean; results?: Record<string, any> };
+    const content = quickMessage.value;
+    let allResults: Record<string, any> = {};
     
-    if (response && response.success) {
-      // 统计发送结果
-      const results = response.results || {};
-      const successCount = Object.values(results).filter((r: any) => r.success).length;
-      const totalCount = Object.keys(results).length;
-      
-      if (successCount > 0) {
-        showStatus(`✅ 发送成功 (${successCount}/${totalCount} 个平台)`, "success");
-        quickMessage.value = "";
-        setTimeout(() => {
-          statusMessage.value = "";
-        }, 3000);
-      } else {
-        showStatus("❌ 所有平台发送失败", "error");
+    // 区分平台：Notion 需要标题，TG/DC 只需要内容
+    const notionPlatforms = selectedPlatforms.value.filter(p => p === 'notion');
+    const otherPlatforms = selectedPlatforms.value.filter(p => p !== 'notion');
+    
+    // 发送到 TG/Discord：只发送纯内容
+    if (otherPlatforms.length > 0) {
+      const response = (await browserAPI.runtime.sendMessage({
+        action: "sendToSelectedPlatforms",
+        text: content,
+        platforms: otherPlatforms,
+      })) as { success: boolean; results?: Record<string, any> };
+      if (response?.results) {
+        allResults = { ...allResults, ...response.results };
       }
+    }
+    
+    // 发送到 Notion：添加"快速发送 时间"作为标题
+    if (notionPlatforms.length > 0) {
+      const now = new Date();
+      const timeStr = now.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const notionMessage = `快速发送 ${timeStr}\n${content}`;
+      
+      const response = (await browserAPI.runtime.sendMessage({
+        action: "sendToSelectedPlatforms",
+        text: notionMessage,
+        platforms: notionPlatforms,
+      })) as { success: boolean; results?: Record<string, any> };
+      if (response?.results) {
+        allResults = { ...allResults, ...response.results };
+      }
+    }
+    
+    // 统计发送结果
+    const successCount = Object.values(allResults).filter((r: any) => r.success).length;
+    const totalCount = Object.keys(allResults).length;
+    
+    if (successCount > 0) {
+      showStatus(`✅ 发送成功 (${successCount}/${totalCount} 个平台)`, "success");
+      quickMessage.value = "";
+      setTimeout(() => {
+        statusMessage.value = "";
+      }, 3000);
     } else {
-      showStatus("❌ 发送失败", "error");
+      showStatus("❌ 所有平台发送失败", "error");
     }
   } catch (error: any) {
     showStatus(`❌ 错误: ${error.message}`, "error");
