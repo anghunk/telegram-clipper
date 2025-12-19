@@ -145,34 +145,6 @@
     </div>
   </div>
   
-  <script>
-    // 数据收集同意页面逻辑
-    const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
-
-    // 检查是否已经同意
-    browserAPI.storage.local.get('data_consent', (result) => {
-      if (result.data_consent === true) {
-        // 已同意,跳转到选项页面
-        window.location.href = 'options.html';
-      }
-    });
-
-    // 接受按钮
-    document.getElementById('acceptBtn').addEventListener('click', () => {
-      browserAPI.storage.local.set({ data_consent: true }, () => {
-        // 保存同意状态后跳转到选项页
-        window.location.href = 'options.html';
-      });
-    });
-
-    // 拒绝按钮
-    document.getElementById('declineBtn').addEventListener('click', () => {
-      browserAPI.storage.local.set({ data_consent: false }, () => {
-        // 显示拒绝提示
-        alert('您已拒绝数据收集。扩展功能将无法正常使用,页面将关闭。');
-        window.close();
-      });
-    });
-  </script>
+  <script src="/consent.js"></script>
 </body>
 </html>
