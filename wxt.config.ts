@@ -4,6 +4,10 @@ import { resolve } from 'path';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
+	// 将所有输出写入同一目录
+	// https://wxt.dev/guide/resources/upgrading.html#default-output-directories-changed
+	outDirTemplate: '{{browser}}-mv{{manifestVersion}}',
+
 	vite: () => ({
 		resolve: {
 			alias: {
@@ -45,8 +49,8 @@ export default defineConfig({
 				// @ts-ignore - data_collection_permissions 是 Firefox 要求的新属性
 				data_collection_permissions: {
 					required: [
-						'browsingActivity',  // 需要访问网页内容和选中的文本
-						'websiteContent'     // 需要读取和处理网页内容
+						'browsingActivity', // 需要访问网页内容和选中的文本
+						'websiteContent', // 需要读取和处理网页内容
 					],
 				},
 			} as any,
