@@ -86,13 +86,12 @@
       "templateHint": "No database?",
       "templateLink": "Copy this template"
     },
-    "language": {
-      "title": "Language Settings",
-      "label": "Interface Language",
+    "general": {
+      "title": "General Settings",
+      "language": "Language",
       "followBrowser": "Follow Browser",
       "chinese": "简体中文",
-      "english": "English",
-      "currentLanguage": "Current Language"
+      "english": "English"
     }
   },
   "edit": {

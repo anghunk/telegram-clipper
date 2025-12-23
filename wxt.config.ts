@@ -4,7 +4,6 @@ import { resolve } from 'path';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
-	// 将所有输出写入同一目录
 	// https://wxt.dev/guide/resources/upgrading.html#default-output-directories-changed
 	outDirTemplate: '{{browser}}-mv{{manifestVersion}}',
 
