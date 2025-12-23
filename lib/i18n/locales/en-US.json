@@ -88,10 +88,12 @@
     },
     "general": {
       "title": "General Settings",
+      "description": "General application settings",
       "language": "Language",
       "followBrowser": "Follow Browser",
       "chinese": "简体中文",
-      "english": "English"
+      "english": "English",
+      "moreSettingsComing": "More settings coming soon..."
     }
   },
   "edit": {

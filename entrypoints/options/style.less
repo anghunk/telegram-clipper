@@ -8,9 +8,17 @@ body {
   box-sizing: border-box;
 }
 
+/* 整体布局容器 */
+.options-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
 .options-container {
   display: flex;
-  min-height: 100vh;
+  flex: 1;
   background: #f5f5f5;
 }
 
@@ -22,7 +30,12 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  min-height: 100vh;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+
+  position: fixed;
+  left: 0;
+  top: 56px;
 }
 
 /* 侧边栏内容区域 */
@@ -165,6 +178,7 @@ body {
   flex: 1;
   padding: 32px 48px;
   max-width: 800px;
+  margin-left: 240px;
 }
 
 .content-header {
@@ -391,53 +405,80 @@ body {
 
 /* 移动端适配 */
 @media (max-width: 768px) {
+  .options-layout {
+    min-height: 100vh;
+    min-height: 100dvh; // 动态视口高度，解决移动端地址栏问题
+  }
+
   .options-container {
     flex-direction: column;
+    min-height: calc(100vh - 52px);
+    min-height: calc(100dvh - 52px);
   }
 
   /* 侧边栏在移动端变为顶部横向菜单 */
   .sidebar {
     width: 100%;
+    height: auto;
+    position: relative;
+    top: 0;
+    left: 0;
     border-right: none;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #eaeef3;
+    min-height: auto;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
   .sidebar-header {
-    padding: 16px;
-  }
-
-  .sidebar-header h1 {
-    font-size: 16px;
+    display: none; // 移动端不显示，因为已经有顶部导航栏
   }
 
   .sidebar-section {
-    padding: 12px 0;
+    padding: 0;
   }
 
   .sidebar-section h3 {
-    padding: 0 16px 8px;
-    font-size: 11px;
+    display: none; // 移动端不显示分组标题，简化布局
   }
 
   .platform-list {
     flex-direction: row;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 0 8px;
+    padding: 8px 12px;
+    gap: 6px;
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE
+    
+    &::-webkit-scrollbar {
+      display: none; // Chrome/Safari
+    }
   }
 
   .platform-item {
     flex-direction: column;
-    min-width: 100px;
-    padding: 12px 16px;
+    min-width: auto;
+    padding: 10px 16px;
     border-left: none;
-    border-bottom: 3px solid transparent;
+    border-bottom: none;
+    border-radius: 10px;
     text-align: center;
-  }
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid transparent;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
 
-  .platform-item.active {
-    border-left-color: transparent;
-    border-bottom-color: #1976d2;
+    &:hover {
+      background: #f0f4f8;
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #e8f4fd 0%, #f0f7ff 100%);
+      border-color: #1976d2;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+    }
   }
 
   .platform-info {
@@ -447,18 +488,27 @@ body {
 
   .platform-name {
     font-size: 13px;
+    white-space: nowrap;
   }
 
   .status-badge {
-    min-width: 48px;
-    height: 20px;
-    font-size: 10px;
+    min-width: 42px;
+    height: 18px;
+    font-size: 9px;
+    padding: 0 8px;
+  }
+
+  /* 版本信息移动端隐藏 */
+  .version-info {
+    display: none;
   }
 
   /* 主内容区 */
   .main-content {
     padding: 20px 16px;
     max-width: 100%;
+    margin-left: 0; // 清除PC端的左边距
+    padding-bottom: env(safe-area-inset-bottom, 20px); // iOS安全区域
   }
 
   .content-header {
@@ -467,16 +517,21 @@ body {
 
   .content-header h2 {
     font-size: 20px;
+    color: #1a1a2e;
   }
 
   .description {
     font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
   }
 
   /* 配置表单 */
   .config-form {
-    padding: 16px;
-    border-radius: 6px;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid #eaeef3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
   .form-group {
@@ -484,35 +539,57 @@ body {
   }
 
   .form-group label {
-    font-size: 13px;
+    font-size: 14px;
+    color: #334155;
+    margin-bottom: 10px;
   }
 
   .form-group input[type="text"] {
-    padding: 10px;
-    font-size: 14px;
+    padding: 12px 14px;
+    font-size: 16px; // 防止iOS缩放
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    transition: all 0.2s;
+
+    &:focus {
+      background: #fff;
+      border-color: #1976d2;
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
   }
 
   .form-group small {
-    font-size: 11px;
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.5;
+    margin-top: 8px;
   }
 
   /* 开关样式 */
+  .switch-label {
+    padding: 12px 0;
+  }
+
   .switch-slider {
-    width: 40px;
-    height: 22px;
+    width: 48px;
+    height: 28px;
+    border-radius: 14px;
   }
 
   .switch-slider::before {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   }
 
-  .switch-input:checked+.switch-slider::before {
-    transform: translateX(18px);
+  .switch-input:checked + .switch-slider::before {
+    transform: translateX(20px);
   }
 
   .switch-text {
-    font-size: 13px;
+    font-size: 14px;
+    color: #334155;
   }
 
   /* 操作按钮 */
@@ -525,58 +602,124 @@ body {
 
   .btn {
     width: 100%;
-    padding: 12px 20px;
-    font-size: 14px;
+    padding: 14px 20px;
+    font-size: 15px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #1976d2 0%, #1e88e5 100%);
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+  }
+
+  .btn-secondary {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+
+    &:active:not(:disabled) {
+      background: #e2e8f0;
+    }
   }
 
   /* 状态消息 */
   .status-message {
-    font-size: 13px;
-    padding: 10px 12px;
+    font-size: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
   }
 
   /* 教程链接 */
   .tutorial-link {
     margin-top: 16px;
-    padding-top: 12px;
+    padding-top: 16px;
   }
 
   .tutorial-link a {
     width: 100%;
     justify-content: center;
-    padding: 10px 16px;
-    font-size: 13px;
+    padding: 12px 16px;
+    font-size: 14px;
+    border-radius: 10px;
   }
 }
 
 /* 小屏幕手机适配 */
 @media (max-width: 480px) {
-  .sidebar-header h1 {
-    font-size: 15px;
+  .platform-list {
+    padding: 6px 10px;
+    gap: 4px;
   }
 
   .platform-item {
-    min-width: 85px;
-    padding: 10px 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
   }
 
   .platform-name {
     font-size: 12px;
   }
 
+  .status-badge {
+    min-width: 38px;
+    height: 16px;
+    font-size: 8px;
+    padding: 0 6px;
+  }
+
   .main-content {
     padding: 16px 12px;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
   }
 
   .content-header h2 {
     font-size: 18px;
   }
 
+  .description {
+    font-size: 12px;
+  }
+
   .config-form {
-    padding: 12px;
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    font-size: 13px;
   }
 
   .form-group input[type="text"] {
+    padding: 12px;
+    font-size: 16px; // 防止iOS缩放
+    border-radius: 8px;
+  }
+
+  .form-group small {
+    font-size: 11px;
+  }
+
+  .action-bar {
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+
+  .btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .tutorial-link a {
+    padding: 10px 14px;
     font-size: 13px;
   }
 }

@@ -1,9 +1,5 @@
 <template>
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <h1>{{ t('options.title') }}</h1>
-    </div>
-
     <div class="sidebar-section">
       <h3>{{ t('options.platformManagement') }}</h3>
       <div class="platform-list">

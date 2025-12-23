@@ -1,18 +1,24 @@
 <template>
-  <div class="options-container">
-    <!-- 侧边栏 -->
-    <Sidebar :platformConfigs="platformConfigs" />
+  <div class="options-layout">
+    <!-- 顶部导航栏 -->
+    <AppHeader />
+    
+    <div class="options-container">
+      <!-- 侧边栏 -->
+      <Sidebar :platformConfigs="platformConfigs" />
 
-    <!-- 主内容区 -->
-    <main class="main-content">
-      <router-view @config-saved="handleConfigSaved" />
-    </main>
+      <!-- 主内容区 -->
+      <main class="main-content">
+        <router-view @config-saved="handleConfigSaved" />
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, provide } from "vue";
 import Sidebar from "./components/Sidebar.vue";
+import AppHeader from "./components/AppHeader.vue";
 import {
   loadAllConfigs,
   type AllPlatformConfigs,
