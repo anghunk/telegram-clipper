@@ -7,5 +7,6 @@ export default [
       { text: 'Chrome Web Store', link: 'https://chromewebstore.google.com/detail/hnpnidoofhkekffllchemjiiffpafhhd' },
       { text: 'Firefox Addons', link: 'https://addons.mozilla.org/zh-CN/firefox/addon/clipper-hub/' },
     ]
-  }
+  },
+   { text: '隐私政策', link: '/PRIVACY_POLICY/en' },
 ]
